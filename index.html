@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOT 2 Scanner — premarket breakout alerts</title>
+<meta name="description" content="Premarket and intraday breakout alerts for low-float momentum stocks: HOT 2, HOT NOW and UNDER THE LINES, from 4:00 AM ET.">
+<!--
+  DRAFT 11-16. Everything in [BRACKETS] is a placeholder to fill in:
+    HOT 2 Scanner            scanner name
+    [DOWN]             one-time down payment, e.g. $199
+    [MONTHLY]          monthly fee, e.g. $79
+    [CHECKOUT_URL]     the Stripe Payment Link (one-time setup fee + monthly subscription in one checkout)
+    [CONTACT_EMAIL]    support email
+  Hosting: GitHub Pages (this one file is the whole site).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f15;--panel:#121923;--line:#223042;--txt:#e7edf5;--dim:#8a97a8;--hot:#ff3df0;--yel:#ffd34d;--grn:#3fd07a;--blu:#5aa9ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 Inter,Segoe UI,Arial,sans-serif}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,21,.92);backdrop-filter:blur(6px);z-index:5}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:800;letter-spacing:.5px;font-size:20px}.logo b{color:var(--hot)}
+.btn{display:inline-block;background:var(--hot);color:#fff;text-decoration:none;font-weight:800;padding:12px 22px;border-radius:10px;box-shadow:0 0 22px rgba(255,61,240,.35)}
+.btn.ghost{background:transparent;border:1px solid var(--line);box-shadow:none}
+.hero{padding:72px 0 40px;text-align:center}
+.hero h1{font-size:clamp(32px,5vw,54px);line-height:1.1;margin:0 0 16px;font-weight:800}
+.hero h1 span{color:var(--hot)}
+.hero p{color:var(--dim);font-size:19px;max-width:720px;margin:0 auto 28px}
+.pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 0}
+.pill{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--dim)}
+section{padding:48px 0}
+h2{font-size:30px;margin:0 0 8px}
+.sub{color:var(--dim);margin:0 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card h3{margin:0 0 6px;font-size:18px}
+.card p{margin:0;color:var(--dim);font-size:15px}
+.tag{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:5px;margin-bottom:10px}
+.t1{background:#3a2a06;color:#ffb347}.t2{background:#4a0d3a;color:#ff9bf0}.t3{background:#0d3340;color:#7fe3ff}.t4{background:#3d3100;color:var(--yel)}
+.alert{font:13px/1.5 Consolas,monospace;background:#111821;border:2px solid var(--hot);box-shadow:0 0 16px rgba(255,61,240,.45);border-radius:10px;padding:12px 14px;margin:0 auto;max-width:760px;text-align:left}
+.alert .t{color:var(--yel);font-weight:700}.alert .s{color:#8ab4ff;font-weight:800}
+.chip{background:var(--hot);color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px}
+.why{color:var(--yel);font-size:12px}
+.steps{counter-reset:s}.steps .card h3::before{counter-increment:s;content:counter(s) ". ";color:var(--hot)}
+.price{max-width:460px;margin:0 auto;text-align:center;border:2px solid var(--hot)}
+.price .big{font-size:44px;font-weight:800}.price .big small{font-size:18px;color:var(--dim);font-weight:600}
+.price ul{text-align:left;color:var(--dim);padding-left:20px;margin:18px 0 22px}
+.price li{margin:6px 0}
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}
+details p{color:var(--dim);margin:10px 0 0}
+.legal{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding:28px 0 40px}
+@media (max-width:600px){.hero{padding:48px 0 24px}.nav .btn{padding:9px 14px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <div class="logo">HOT 2 <b>SCANNER</b></div>
+  <a class="btn" href="#pricing">Get access</a>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <h1>See the breakout <span>while it's happening</span>, not after.</h1>
+  <p>A premarket and intraday scanner for low-float momentum stocks. From 4:00&nbsp;AM&nbsp;ET it watches thousands of tickers and alerts you the moment one breaks out on real volume.</p>
+  <a class="btn" href="#pricing">Get access</a> &nbsp; <a class="btn ghost" href="#how">How it works</a>
+  <div class="pills"><span class="pill">Live from 4:00 AM ET</span><span class="pill">Premarket · regular hours · after-hours</span><span class="pill">3 alert types</span><span class="pill">100k-volume breakout flag</span></div>
+</div>
+
+<div class="wrap" style="padding-bottom:16px">
+  <div class="alert">
+    <span class="t">08:30:54</span> &nbsp;<span class="s">GMM</span> &nbsp;#2 &nbsp;BREAKING NOW &nbsp;<span class="chip">1ST 100K BREAKOUT</span> &nbsp;256k<br>
+    <span class="why">broke YHOD 1.05 at 08:30:08, +39.0% over it, 13x normal minute</span>
+  </div>
+  <p style="text-align:center;color:var(--dim);font-size:13px;margin-top:8px">A real alert from the scanner (11-16-2026). Example only, not a promise of future moves.</p>
+</div>
+
+<section id="what"><div class="wrap">
+  <h2>What you get</h2>
+  <p class="sub">The same screen I trade from every morning.</p>
+  <div class="grid">
+    <div class="card"><span class="tag t1">HOT 2</span><h3>Breakout alerts</h3><p>Fires when a stock breaks yesterday's high or the premarket high with real volume behind it, ranked by how hard it's moving.</p></div>
+    <div class="card"><span class="tag t2">100K FLAG</span><h3>The 100k candle</h3><p>A purple flag when a stock prints a 100,000-share 1-minute candle on its breakout, and again whenever it does it later. You see what's actually moving right now.</p></div>
+    <div class="card"><span class="tag t3">UNDER THE LINES</span><h3>Early box breakouts</h3><p>Stocks breaking out of their 1-minute and 5-minute consolidation boxes on heavy volume before they show up on the main list.</p></div>
+    <div class="card"><span class="tag t4">HOT NOW</span><h3>What's in play</h3><p>The names waking up, in play and moving, with float, % of float traded, and the highest-volume stock highlighted live.</p></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">No software to install.</p>
+  <div class="grid steps">
+    <div class="card"><h3>Join</h3><p>Pay the one-time setup fee and the first month through secure checkout (Stripe).</p></div>
+    <div class="card"><h3>Get your invite</h3><p>You're sent an invite to the private members channel within minutes.</p></div>
+    <div class="card"><h3>Get the alerts</h3><p>Every alert posts live with the ticker, time, level it broke, volume and float. Turn on notifications and you see it the second it fires.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <h2 style="text-align:center">Pricing</h2>
+  <p class="sub" style="text-align:center">One setup fee, then a monthly membership. Cancel any time.</p>
+  <div class="card price">
+    <div class="big">$199 <small>one-time setup</small></div>
+    <div class="big" style="font-size:30px">+ $79 <small>/ month</small></div>
+    <ul>
+      <li>All alert types: HOT 2, 100K flag, UNDER THE LINES, HOT NOW</li>
+      <li>Live from 4:00 AM ET through after-hours</li>
+      <li>Private members channel</li>
+      <li>Cancel the monthly membership any time</li>
+    </ul>
+    <span class="btn" style="opacity:.6;cursor:default">Opening soon</span>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <h2>Questions</h2>
+  <details><summary>What stocks does it scan?</summary><p>Low-float U.S. stocks that are moving, premarket from 4:00 AM ET, regular hours and after-hours.</p></details>
+  <details><summary>Does it trade for me?</summary><p>No. It's an alert service. You decide what to trade and you place your own orders with your own broker.</p></details>
+  <details><summary>Is the setup fee refundable?</summary><p>The refund policy will be posted here before memberships open.</p></details>
+  <details><summary>How do I cancel?</summary><p>Cancel the monthly membership any time from the link in your receipt email. You keep access until the end of the month you paid for.</p></details>
+  </div></section>
+</main>
+
+<footer class="wrap legal">
+  <p><b>Not financial advice.</b> HOT 2 Scanner provides market alerts for information and education only. Nothing here is a recommendation to buy or sell any security. Trading low-float and premarket stocks is very risky and you can lose more than you expect. Past alerts and examples do not predict future results. Alert timing and data can be delayed or wrong.</p>
+  <p>© 2026 HOT 2 Scanner. All rights reserved.</p>
+</footer>
+</body>
+</html>
