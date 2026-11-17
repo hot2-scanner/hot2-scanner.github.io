@@ -116,7 +116,7 @@ tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
 <h2 style="color:#f5c542">&#128276; HOT 2 ALERTS <span class="dim" id="alsub"></span></h2>
 <div class="alertbox" id="alerts"><div class="empty">loading...</div></div>
 
-<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">box breakout + 100k/min, UNDER YHOD and PMHOD &middot; off once above either &middot; max 5 &middot; look only &middot; <span id="ulsub"></span></span></h2>
+<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">box breakout + 100k/min, UNDER YHOD and PMHOD &middot; off once above either &middot; top 5 by volume &middot; look only &middot; <span id="ulsub"></span></span></h2>
 <div class="ulbox" id="under"><div class="empty">loading...</div></div>
 
 <h2 class="yl">&#128293; HOT NOW <span class="dim" id="hnsub"></span></h2>
@@ -420,8 +420,9 @@ async function loadUnder(){
   box.innerHTML=rows.map(r=>'<div class="ulrow"><div class="aline"><span class="ulat">'+(r.at||'')+'</span>'
     +'<span class="sym">'+r.sym+'</span><span>'+(+r.px).toPrecision(4)+'</span>'
     +(r.now?'<span class="dim">now '+(+r.now).toPrecision(4)+'</span>':'')
+    +(r.vnow?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vnow)+'/min</span>':'')
     +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">&rarr; HOT 2 '+r.hot2+'</span>':'')
-    +'<span class="v1chip">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)+lnTag('PMHOD',r.pmhod,r.now||r.px)
+    +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)+lnTag('PMHOD',r.pmhod,r.now||r.px)
     +'<span class="arght dim">broke out of box '+(+r.bot).toPrecision(4)+'-'+(+r.top).toPrecision(4)+' (1m + 5m)</span></div></div>').join('');
 }
 all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadUnder();setInterval(loadUnder,5000);
