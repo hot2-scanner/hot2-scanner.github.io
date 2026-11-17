@@ -201,25 +201,26 @@ function lastTag(s){return (!isHot(s)&&LAST100[s])?('last 100k '+LAST100[s]):''}
 // Above + 100k + armed -> gold. Gold stays while above and 100k. Above but cooled -> off and NOT re-armed until it
 // goes back under (price < PM high - 0.5%). Then a new break with 100k lights gold again.
 // 11-17: the gold state now comes from the SERVER (/pmh_gold) for every stock, so a stale tab or a row that scrolled off can't miss it
-let GOLDSET={},PMHMAP={};
+let GOLDSET={},PMHMAP={},GLINE='PM HIGH';   // 11-17: after 4:00 PM the line is today's DAY HIGH (9:30-4:00)
 function pmhChip(s){const x=PMHMAP[s];if(!x)return '';const L=x[0],pct=x[2];
   const lv=(+L).toPrecision(4);
-  return x[3]?'<span class="pmA">ABOVE PM HIGH '+lv+' &middot; '+(pct>=0?'+':'')+pct.toFixed(1)+'% &middot; since '+x[3]+'</span>'
-             :'<span class="pmU">UNDER PM HIGH '+lv+' &middot; '+pct.toFixed(1)+'%</span>'}
+  return x[3]?'<span class="pmA">ABOVE '+GLINE+' '+lv+' &middot; '+(pct>=0?'+':'')+pct.toFixed(1)+'% &middot; since '+x[3]+'</span>'
+             :'<span class="pmU">UNDER '+GLINE+' '+lv+' &middot; '+pct.toFixed(1)+'%</span>'}
 function applyPmh(){
+  document.querySelectorAll('.apmh').forEach(e=>e.textContent=GLINE+' BREAK + 100K');
   document.querySelectorAll('.arow[data-s]').forEach(r=>{const s=r.dataset.s,x=PMHMAP[s];
     r.classList.toggle('pmhabove',!!(x&&x[3]));const c=r.querySelector('.apmhx');if(c)c.innerHTML=pmhChip(s)});
   document.querySelectorAll('td.v1[data-vsym]').forEach(td=>{const tr=td.closest('tr');if(!tr)return;const s=td.dataset.vsym,x=PMHMAP[s];
     tr.classList.toggle('pmhabove',!!(x&&x[3]));const sc=tr.querySelector('td.sym');if(!sc)return;
-    let t=sc.querySelector('.pmT');if(x&&x[3]){if(!t){t=document.createElement('span');t.className='pmT';sc.appendChild(t)}t.textContent='\u25B2PMH'}else if(t)t.remove()});}
+    let t=sc.querySelector('.pmT');if(x&&x[3]){if(!t){t=document.createElement('span');t.className='pmT';sc.appendChild(t)}t.textContent=GLINE=='DAY HIGH'?'\u25B2HOD':'\u25B2PMH'}else if(t)t.remove()});}
 async function loadGold(){let j;
   const syms=[...new Set([...document.querySelectorAll('[data-s],[data-vsym]')].map(e=>e.dataset.s||e.dataset.vsym))].filter(Boolean);
   try{j=await (await fetch('/pmh_gold?syms='+encodeURIComponent(syms.join(',')),{cache:'no-store'})).json()}catch(e){return}
-  PMHMAP=j.pmh||{};applyPmh();
+  GLINE=j.line||'PM HIGH';PMHMAP=j.pmh||{};applyPmh();
   const g=j.gold||[];GOLDSET={};g.forEach(o=>GOLDSET[o.sym]=o);
   const b=$('goldbar');
-  if(g.length){b.style.display='block';b.innerHTML=g.map(o=>'&#11088; PM HIGH BREAK + 100K: <b>'+o.sym+'</b> '+(+o.px).toPrecision(4)
-     +' &nbsp;broke the premarket high '+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
+  if(g.length){b.style.display='block';b.innerHTML=g.map(o=>'&#11088; '+GLINE+' BREAK + 100K: <b>'+o.sym+'</b> '+(+o.px).toPrecision(4)
+     +' &nbsp;broke '+(GLINE=='DAY HIGH'?"today's high (9:30-4:00) ":'the premarket high ')+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
   else b.style.display='none';
   document.querySelectorAll('.arow[data-s]').forEach(r=>r.classList.toggle('pmhgold',!!GOLDSET[r.dataset.s]));}
 let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
