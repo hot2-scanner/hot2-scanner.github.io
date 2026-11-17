@@ -56,6 +56,11 @@ font-size:13px;line-height:1.6}
 .arow.first1gold{border:3px solid #ffd000!important;animation:g1blink 1s ease-in-out infinite}
 .afirst{color:#111;background:#ffd000;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
 .arow.first1gold .afirst{display:inline}.arow.first1gold .abig{display:none}
+/* 11-17 his ask: from 9:30, EVERY break above TODAY'S premarket high with 100k+ = the same blinking gold. Re-arms when it
+   drops back under the PM high (0.5% under), so a failed break + retest that goes again lights gold again. */
+.arow.pmhgold{border:3px solid #ffd000!important;animation:g1blink 1s ease-in-out infinite}
+.apmh{color:#111;background:#ffd000;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
+.arow.pmhgold .apmh{display:inline}.arow.pmhgold .abig{display:none}.arow.pmhgold .afirst{display:none}
 .alast{font-size:11px;color:#9aa4b2;border:1px dashed #555;border-radius:4px;padding:0 6px}
 .alast:empty{display:none}
 tr.ptr td{box-shadow:inset 0 0 0 9999px rgba(255,61,240,.16)} tr.ptr td:first-child{border-left:3px solid #ff3df0}
@@ -183,8 +188,19 @@ function vScore(s){const x=VOL[s];if(!x)return 0;return Math.max(x.v||0,x.pv||0)
 function isHot(s){return vScore(s)>=100000}
 function hotLabel(s){return (FIRST100[s]&&!COOLED[s])?'1ST 100K BREAKOUT':(FIRST100[s]?'100K AGAIN':'100K NOW')}
 function lastTag(s){return (!isHot(s)&&LAST100[s])?('last 100k '+LAST100[s]):''}
+// 11-17 PM-HIGH GOLD state per stock: ARM = it is (or was last seen) under today's PM high, so the next break counts.
+// Above + 100k + armed -> gold. Gold stays while above and 100k. Above but cooled -> off and NOT re-armed until it
+// goes back under (price < PM high - 0.5%). Then a new break with 100k lights gold again.
+let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
+function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
+  if(etMin()<570||!x||!L||!x.px){PMHG[s]=false;return}
+  if(x.px<L*0.995){PMHARM[s]=true;PMHG[s]=false;return}
+  if(x.px<=L){PMHG[s]=false;return}                          // within 0.5% under the line: no change to the arm
+  if(isHot(s)&&(PMHG[s]||PMHARM[s]!==false)){PMHG[s]=true;PMHARM[s]=false;return}
+  PMHG[s]=false;PMHARM[s]=false}
 function checkBig(best,bv){
   const now=etMin(); let ch=false;
+  document.querySelectorAll('.arow[data-s]').forEach(r=>pmhStep(r.dataset.s));
   document.querySelectorAll('.arow').forEach(r=>{
     const s=r.dataset.s;if(!s)return;
     const hot=isHot(s), x=VOL[s];
@@ -195,6 +211,7 @@ function checkBig(best,bv){
     if(!hot&&FIRST100[s]&&!COOLED[s]){COOLED[s]=true;ch=true}
     r.classList.toggle('big100',hot);
     r.classList.toggle('first1gold',hot&&r.dataset.n==='1');
+    r.classList.toggle('pmhgold',!!PMHG[s]);
     r.classList.toggle('goldrow',!!best&&s===best&&bv>=100000);
     const lb=r.querySelector('.abig');if(lb)lb.textContent=hotLabel(s);
     const lt=r.querySelector('.alast');if(lt)lt.textContent=lastTag(s);
@@ -295,12 +312,13 @@ async function loadAlerts(){
     $('alsub').textContent=' newest first \u00b7 '+rows.length+' shown';
     let h='';
     rows.forEach(k=>{
+      {const mm=/broke premarket high ([\d.]+)/.exec(k.why||'');if(mm)PMHLV[k.sym]=+mm[1];}
       const isNew = k.fresh;   // pulses the whole time it is a fresh face
       let d='';
       (k.dots||['x','x','x']).forEach(v=>{
         d+='<span class="adot '+(v==='g'?'g':(v==='r'?'r':'x'))+'"></span>';
       });
-      h+='<div class="arow'+(k.pinned?' pinned':'')+(isNew?' flash':'')+(isHot(k.sym)?' big100':'')+(GOLD&&k.sym===GOLD?' goldrow':'')+(isHot(k.sym)&&(k.n||1)<=1?' first1gold':'')
+      h+='<div class="arow'+(k.pinned?' pinned':'')+(isNew?' flash':'')+(isHot(k.sym)?' big100':'')+(GOLD&&k.sym===GOLD?' goldrow':'')+(isHot(k.sym)&&(k.n||1)<=1?' first1gold':'')+(PMHG[k.sym]?' pmhgold':'')
         +'" data-n="'+(k.n||1)+'" data-s="'+k.sym+'" data-first5="'+((k.n||1)<=1&&k.rank&&k.rank<=5?1:0)+'" data-at="'+(k.at||'')+'">'
         +'<div class="aline">'
         +'<span class="at">'+(k.at||'')+'</span>'
@@ -311,6 +329,7 @@ async function loadAlerts(){
         +(k.fresh?'<span class="afr">FRESH 1st</span>':'')
         +'<span class="agold">MOST VOLUME NOW</span>'
         +'<span class="afirst">1ST ALERT + 100K</span>'
+        +'<span class="apmh">PM HIGH BREAK + 100K</span>'
         +'<span class="abig">'+hotLabel(k.sym)+'</span>'
         +'<span class="alast">'+lastTag(k.sym)+'</span>'
         +'<span class="v1chip" data-vsym="'+k.sym+'">'+volHtml(k.sym)+'</span>'
