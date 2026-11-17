@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOT 2 Scanner Guide</title>
+<meta name="description" content="What every section, color and label on the HOT 2 Scanner screen means.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f15;--panel:#121923;--line:#223042;--txt:#e7edf5;--dim:#8a97a8;--hot:#ff3df0;--yel:#ffd34d;--grn:#3fd07a;--red:#ff5c5c;--cy:#1fd3ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 Inter,Segoe UI,Arial,sans-serif}
+a{color:#7cc4f5}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,21,.94);z-index:5}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px;gap:10px}
+.logo{font-weight:800;letter-spacing:.5px;font-size:19px;text-decoration:none;color:var(--txt)}.logo b{color:var(--hot)}
+.nav a.l{color:var(--dim);text-decoration:none;font-weight:600;font-size:14px;margin-left:14px}
+h1{font-size:clamp(28px,4.5vw,40px);margin:36px 0 6px}
+.lead{color:var(--dim);font-size:17px;margin:0 0 18px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.toc a{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--dim);text-decoration:none}
+h2{font-size:24px;margin:40px 0 4px;padding-top:8px;border-top:1px solid var(--line)}
+h2 .ic{margin-right:6px}
+.sub{color:var(--dim);margin:0 0 14px}
+.row{display:grid;grid-template-columns:minmax(150px,230px) 1fr;gap:6px 18px;align-items:start;background:var(--panel);
+ border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.row p{margin:0;color:#c9d1d9;font-size:15px}
+.row p b{color:var(--txt)}
+@media (max-width:620px){.row{grid-template-columns:1fr}}
+/* look-alike chips, same colors as the live screen */
+.ch{display:inline-block;font-weight:800;font-size:11.5px;padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:.3px}
+.c100{background:#ff3df0;color:#fff}.cgold{background:#ffd000;color:#111}
+.pu{background:#3a2a06;color:#ffb347}.pi{background:#0d2a40;color:#7cc4f5}.pn{background:#262b35;color:#c9d1d9}.pb{background:#3a2a06;color:#ffb347}
+.fr{color:#ff9d3b;font-weight:800;font-size:12px}.cnt{color:#7cc4f5;font-weight:800}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.g{background:#2ecc71}.r{background:#ff4d4d}.x{background:#39414f}
+.box{display:inline-block;padding:5px 10px;border-radius:7px;font-size:13px;font-weight:700}
+.bpurple{background:#4a0d3a;border:2px solid #ff3df0;box-shadow:0 0 10px #ff3df0;color:#fff}
+@keyframes g1{0%,100%{background:#5a4300;box-shadow:0 0 16px #ffd000}50%{background:#2a2000;box-shadow:0 0 3px #ffd000}}
+.bgold{border:3px solid #ffd000;animation:g1 1s ease-in-out infinite;color:#fff}
+.bamber{background:#3a2a06;border:1px solid #ff9d3b;color:#fff}
+.bred{background:#5a0b0b;border:2px solid #ff3030;box-shadow:0 0 10px #ff3030;color:#fff}
+.bcy{background:#102a30;border:1px solid #1f4a52;border-left:4px solid #1fd3ea;color:#5fe8ff}
+.vtop{background:#ffd84d;color:#111;padding:1px 6px;border-radius:4px;font-weight:800}
+.up{color:#2ecc71}.dn{color:#ff4d4d}
+.lnU{background:#3a1420;color:#ff8fa8;font-weight:700;font-size:11.5px;padding:1px 6px;border-radius:4px}
+.lnA{background:#123524;color:#2ecc71;font-weight:700;font-size:11.5px;padding:1px 6px;border-radius:4px}
+.h2t{background:#3a2a05;color:#f5c542;font-weight:700;font-size:11.5px;padding:1px 6px;border-radius:4px}
+.ex{font:13px/1.5 Consolas,monospace;background:#111821;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--yel);overflow-wrap:anywhere}
+.ex .s{color:#8ab4ff;font-weight:800}
+.note{background:#1a1408;border:1px solid #4a3a10;border-radius:10px;padding:12px 14px;color:#e8d9a8;font-size:14.5px;margin:12px 0}
+.legal{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding:24px 0 40px;margin-top:40px}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo" href="./">HOT 2 <b>SCANNER</b></a>
+  <div><a class="l" href="live/">Members sign in</a><a class="l" href="./#pricing">Join</a></div>
+</div></header>
+
+<main class="wrap">
+<h1>How to read the screen</h1>
+<p class="lead">What every section, color and label on the live HOT 2 Scanner means, top to bottom. Everything updates by itself every few seconds from 4:00 AM to 8:00 PM ET, Monday to Friday.</p>
+<div class="toc">
+  <a href="#words">Key words</a><a href="#top">Top of the screen</a><a href="#breaking">Breaking now</a>
+  <a href="#alerts">HOT 2 alerts</a><a href="#colors">Alert colors</a><a href="#under">Under the lines</a><a href="#hotnow">Hot now</a>
+</div>
+
+<h2 id="words"><span class="ic">&#128218;</span>Key words</h2>
+<p class="sub">These show up everywhere on the screen.</p>
+<div class="row"><b>YHOD</b><p><b>Yesterday's high of day</b>: the highest price the stock traded yesterday during regular hours (9:30 AM&ndash;4:00 PM ET). A big line traders watch.</p></div>
+<div class="row"><b>PMHOD</b><p>The highest price from <b>yesterday's after-hours</b> session (4:00&ndash;8:00 PM ET). The other big line.</p></div>
+<div class="row"><b>Breakout</b><p>The price going <b>above</b> one of those lines (or above a tight trading range) after being under it.</p></div>
+<div class="row"><b>1-min candle / 1-min volume</b><p>How many shares traded in one minute. <b>100k</b> means 100,000 shares in a single minute, a sign that real money is moving the stock. The scanner checks this while the minute is still forming, not only after it closes.</p></div>
+<div class="row"><b>Float</b><p>How many shares are available to trade. Small floats (under 20M, shown in bright white) can move fast. Larger floats are shown dimmer.</p></div>
+
+<h2 id="top"><span class="ic">&#9650;</span>Top of the screen</h2>
+<div class="row"><span><span style="color:#2ecc71">&#9679;</span> live &nbsp; <span style="color:#ff5c5c">&#9679;</span> offline</span><p><b>Top right corner.</b> Green "live" means the screen is getting fresh data. Red "scanner offline" means no update for over 90 seconds, so what you see is old. Don't use it until it turns green again.</p></div>
+<div class="row"><span style="color:#ffd84d;font-weight:700">&#128266; MOST VOLUME RIGHT NOW: FRTT 629,187</span><p>The single stock on your screen with the biggest 1-minute volume right now. Its volume number is also <span class="vtop">highlighted yellow</span> wherever it appears.</p></div>
+<div class="row"><span class="box bred">&#128308; 100K HERE: VNRX</span><p><b>Red banner and red-edged row, for 15 minutes.</b> A stock just closed a 100k+ share 1-minute candle <b>on top of</b> its tight trading range (its "box"), with the 1-minute and 5-minute ranges lined up. It shows the minute, the shares and the box.</p></div>
+
+<h2 id="breaking"><span class="ic">&#9889;</span>Breaking now</h2>
+<p class="sub">The top 5 stocks on the board right now. The ones that just broke a line are at the top.</p>
+<div class="row"><b>float &middot; ticker</b><p>Float first (because it matters), then the stock symbol.</p></div>
+<div class="row"><span><span class="ch pb">BREAKING NOW</span> <span class="ch pu">WAKING UP</span> <span class="ch pi">IN PLAY</span> <span class="ch pn">MOVING</span></span>
+ <p><b>What it's doing.</b> <b>BREAKING NOW</b> = it just broke a line. <b>WAKING UP</b> = up 10%+, $100k traded in the last 5 minutes, volume at least 2x its own recent pace and rising. <b>IN PLAY</b> = up 10%+ with $50k in the last 5 minutes. <b>MOVING</b> = up 5%+ with $25k in the last 5 minutes.</p></div>
+<div class="row"><span>582k <span class="up">&#9650;</span> &nbsp; 85k <span class="dn">&#9660;</span> &nbsp; ~52k</span><p><b>1-min vol.</b> Shares in the current 1-minute candle. Green &#9650; = more than the minute before, red &#9660; = less. A "~" means it's estimated from live quotes for a stock that doesn't have a recorded candle yet.</p></div>
+<div class="row"><b>last &middot; day &middot; vs break</b><p>Current price, % up or down on the day, and how far it is above (+) or below (&minus;) the line it broke.</p></div>
+<div class="row"><b>vol &middot; % float &middot; shares</b><p><b>vol</b> = how many times a normal minute's volume it's doing (13x = 13 times normal). <b>% float</b> = how much of the whole float has traded since the break. <b>shares</b> = shares traded since the break.</p></div>
+<div class="row"><b>why</b><p>The scanner's reason in plain words, e.g. which line it broke, when, and at what price.</p></div>
+<div class="row"><span class="box" style="background:rgba(255,61,240,.18);border-left:3px solid #ff3df0">pink-tinted row</span><p>That stock is doing <b>100k+ shares a minute right now</b>.</p></div>
+
+<h2 id="alerts"><span class="ic">&#128276;</span>HOT 2 alerts</h2>
+<p class="sub">The main alert list, newest on top. A stock lands here when it breaks a key line with real volume and ranks near the top of the board.</p>
+<div class="ex"><span style="color:#ffb347">09:17:01</span> <span class="s">PAVS</span> #3 <span class="ch pb">BREAKING NOW</span> <span class="cnt">x2</span> <span class="ch c100">100K AGAIN</span> 718k <span class="up">&#9650;</span> &nbsp;<span class="dot g"></span><span class="dot g"></span><span class="dot g"></span><br>broke YHOD 2.58 at 09:16:15, +3.9% over it, 33x normal minute, 3.4% of float traded since - 35,837 sh / $96,731 since the break</div>
+<div class="row" style="margin-top:10px"><b>09:17:01</b><p>The time the alert fired (Eastern Time, to the second).</p></div>
+<div class="row"><b>#3</b><p>Its rank on the board at that moment (#1 = strongest).</p></div>
+<div class="row"><span class="cnt">x1 &nbsp; x2 &nbsp; x9</span><p><b>How many times</b> this stock has come onto the board today. <b>x1 = its first time today</b>, usually the most important one. x2 and up = it's back again.</p></div>
+<div class="row"><span class="fr">FRESH 1st</span><p>First alert of the day <b>and</b> it has real volume behind it (a brand-new face, not noise).</p></div>
+<div class="row"><span><span class="ch c100">1ST 100K BREAKOUT</span><br><span class="ch c100">100K AGAIN</span> <span class="ch c100">100K NOW</span></span><p>Shown while the stock is doing <b>100k+ shares in its 1-minute candle</b>. "1ST 100K BREAKOUT" = it hit 100k on its first top-5 alert of the day. "100K AGAIN" = it cooled off and is back over 100k. "100K NOW" = over 100k right now.</p></div>
+<div class="row"><span style="font-size:12px;color:#9aa4b2;border:1px dashed #555;border-radius:4px;padding:0 6px">last 100k 09:16</span><p>When the stock is no longer at 100k, this shows the last minute it was.</p></div>
+<div class="row"><span><span class="dot g"></span><span class="dot r"></span><span class="dot g"></span> &nbsp;<span class="dot x"></span><span class="dot x"></span><span class="dot x"></span></span><p><b>Three dots = the 1-minute, 5-minute and 15-minute candles</b> that are forming right now, left to right. Green = price is above where that candle opened, red = below. Gray = no fresh data.</p></div>
+<div class="row"><span><span style="color:#fff;text-shadow:0 0 8px #fff">&#9650;</span> white &nbsp; <span style="color:#2ecc71;text-shadow:0 0 8px #2ecc71">&#9650;</span> green</span><p><b>White arrow</b> = this minute's volume is 2.5x+ the minute before <b>and</b> the candle is green (a volume surge). <b>Green arrow</b> = a tight "coil" range is live on the chart.</p></div>
+<div class="row"><b>yellow line underneath</b><p>The details: which line it broke (YHOD / PMHOD), the price, the time, how far over it is, volume vs normal, % of float traded, and shares and dollars since the break.</p></div>
+
+<h2 id="colors"><span class="ic">&#127912;</span>Alert colors</h2>
+<p class="sub">The whole alert row lights up so you can spot it without reading.</p>
+<div class="row"><span class="box bgold">1ST ALERT + 100K</span><p><b>Blinking gold, the big one.</b> It's the stock's <b>first alert of the day (x1)</b> and it's doing <b>100k+ shares a minute right now</b>. It stops blinking when volume drops under 100k or the stock alerts a second time.</p></div>
+<div class="row"><span class="box bpurple">purple glow</span><p>The stock is doing <b>100k+ shares a minute right now</b> (any alert, first or later). It goes back to normal when it cools off.</p></div>
+<div class="row"><span class="box bamber">amber</span><p>A <b>fresh face</b>: first alert of the day with real volume. Stays highlighted until it alerts again.</p></div>
+<div class="row"><span class="box bred">red edge</span><p><b>100K HERE</b>: a 100k candle just closed on top of its box (see the red banner above). Lasts 15 minutes.</p></div>
+<div class="row"><span class="box" style="border:1px solid #223042;background:#15181f">plain</span><p>A normal alert with nothing special going on right now.</p></div>
+
+<h2 id="under"><span class="ic">&#128309;</span>Under the lines</h2>
+<p class="sub">Early heads-up: a stock breaking out of its tight trading range on heavy volume <b>while it's still under YHOD and PMHOD</b>, often before it becomes a HOT 2 alert.</p>
+<div class="ex" style="color:#5fe8ff;border-left:4px solid #1fd3ea">08:38:53 <span class="s" style="color:#5fe8ff">GIPR</span> 0.3154 <span style="color:#8a97a8">now 0.2798</span> <span class="h2t">&rarr; HOT 2 08:40:16</span> 683k/min <span class="lnU">UNDER YHOD 0.3281</span> <span class="lnU">UNDER PMHOD 0.3708</span><br><span style="color:#8a97a8">broke out of box 0.2460-0.2508 (1m + 5m)</span></div>
+<div class="row" style="margin-top:10px"><b>When it fires</b><p>All of these at once: up <b>10%+</b> on the day, <b>100k+ shares a minute</b>, it just broke above its tight <b>1-minute and 5-minute range</b> (the "box"), it's <b>not on HOT 2 yet</b>, and it's still <b>under YHOD and PMHOD</b>.</p></div>
+<div class="row"><b>08:38:53 &middot; price &middot; now</b><p>The time it fired and the price then, plus the price right now.</p></div>
+<div class="row"><span class="lnU">UNDER YHOD 0.3281</span><p>Where it is versus each line. <b>It comes off the list as soon as it goes above YHOD or PMHOD</b>; at that point it usually turns into a HOT 2 alert.</p></div>
+<div class="row"><span class="h2t">&rarr; HOT 2 08:40:16</span><p>HOT 2 alerted this stock after Under the lines flagged it, and when.</p></div>
+<div class="row"><b>broke out of box</b><p>The low and high of the tight range it broke out of.</p></div>
+<div class="row"><b>Max 5</b><p>Only the 5 newest show at once. "Nothing right now" means nothing qualifies at the moment.</p></div>
+
+<h2 id="hotnow"><span class="ic">&#128293;</span>Hot now</h2>
+<p class="sub">The top 5 stocks with the most action right now, whether or not they broke a line.</p>
+<div class="row"><b>status</b><p>WAKING UP / IN PLAY / MOVING, same meaning as above. <b>NEW</b> = its move started in the last 5 minutes.</p></div>
+<div class="row"><b>5-min % &middot; 5-min $</b><p>How much it moved and how many dollars traded in the last 5 minutes.</p></div>
+<div class="row"><b>vol pace</b><p>Volume now compared with its own recent normal (2x = twice as busy).</p></div>
+<div class="row"><b>day volume</b><p>Total shares traded today.</p></div>
+<div class="row"><b>leg began</b><p>When the current move started, and how many minutes ago.</p></div>
+<div class="row"><b>from HOD &middot; vs YHOD</b><p>How far it is below today's high, and how far above (+) or below (&minus;) yesterday's high.</p></div>
+
+<div class="note"><b>Remember:</b> the scanner shows you what is moving. It does not tell you to buy or sell. Fast low-float stocks can drop as quickly as they rise. Use your own plan and your own risk limits.</div>
+</main>
+
+<footer class="wrap legal">
+  <p><b>Not financial advice.</b> HOT 2 Scanner provides market alerts for information and education only. Nothing here is a recommendation to buy or sell any security. Trading low-float and premarket stocks is very risky. Alerts and data can be delayed or wrong. See the <a href="terms.html">Terms of Service</a>.</p>
+  <p>&copy; 2026 HOT 2 Scanner.</p>
+</footer>
+</body>
+</html>
