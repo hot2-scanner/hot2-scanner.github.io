@@ -432,7 +432,8 @@ async function load100k(){
   (f.flash||[]).forEach(o=>{const t=(o.at||'').split(':');if(t.length<2)return;
     const age=now-((+t[0])*60+(+t[1])+(+(t[2]||0))/60);if(age>=0&&age<=15){K100[o.sym]=o;fresh.push(o)}});
   const b=$('k100');
-  if(fresh.length){b.style.display='block';b.innerHTML=fresh.slice().reverse().map(o=>'&#128308; 100K HERE: '+o.sym+'  '+o.minute
+  // 11-17 his call: the TOP of the screen is for the GOLD only -- 100K HERE just lights the stock's own row red
+  if(false&&fresh.length){b.style.display='block';b.innerHTML=fresh.slice().reverse().map(o=>'&#128308; 100K HERE: '+o.sym+'  '+o.minute
      +'  '+big(o.vol)+' sh  close '+o.close+' on top of box '+o.box1_lo+'-'+o.box1_hi).join('<br>')}
   else{b.style.display='none'}
   document.querySelectorAll('tr,.arow').forEach(r=>{const s=r.dataset&&r.dataset.s?r.dataset.s:(r.querySelector&&r.querySelector('td:nth-child(3)')?r.querySelector('td:nth-child(3)').textContent.trim().split(' ')[0]:'');
