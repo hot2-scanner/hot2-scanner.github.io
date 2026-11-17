@@ -485,17 +485,24 @@ all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();set
  <h1>HOT 2 <span style="color:#ff3df0">SCANNER</span></h1>
  <p id="gp">Members sign in with the email they paid with. We email you a sign-in link.</p>
  <div id="gform"><input id="em" type="email" placeholder="you@example.com" autocomplete="email">
+ <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:#c9d1d9;cursor:pointer"><input id="rem" type="checkbox" checked style="width:18px;height:18px;margin:0;cursor:pointer"> Remember me on this computer</label>
  <button class="go" id="send">Email me a sign-in link</button></div>
  <div class="msg" id="gmsg"></div>
  <p style="font-size:12px;margin-top:16px">Not a member? <a href="../#pricing" style="color:#7cc4f5">Join here</a>.<br>By signing in you agree to the <a href="../terms.html" style="color:#7cc4f5">Terms of Service</a>. Not financial advice.</p>
 </div></div>
 <div id="live" style="display:none"><a href="../guide.html" target="_blank" id="gd">&#10067; What does it all mean?</a> <b>&#9679;</b> <span id="lt">connecting</span><button id="out">sign out</button></div>
 <script>
-const sb=window.supabase.createClient('https://bbfjmqvklilpqkxwlzib.supabase.co','sb_publishable_b1GOHTUJgD6xgfVYT0nSeQ_0tySTlos',{auth:{persistSession:true,detectSessionInUrl:true}});
+// 11-17 his ask: REMEMBER ME box. Checked = stay signed in on this computer (localStorage). Unchecked = signed out when
+// the browser/tab closes (sessionStorage). The choice is saved when he asks for the link, so the link's tab uses it.
+const REM=(()=>{try{return localStorage.getItem('h2_remember')!=='0'}catch(e){return true}})();
+if(!REM){try{Object.keys(localStorage).filter(k=>k.indexOf('sb-')===0).forEach(k=>localStorage.removeItem(k))}catch(e){}}
+const sb=window.supabase.createClient('https://bbfjmqvklilpqkxwlzib.supabase.co','sb_publishable_b1GOHTUJgD6xgfVYT0nSeQ_0tySTlos',{auth:{persistSession:true,detectSessionInUrl:true,storage:REM?window.localStorage:window.sessionStorage}});
 const G=id=>document.getElementById(id);
+G('rem').checked=REM;
 function gmsg(t){G('gmsg').textContent=t}
 G('send').onclick=async()=>{const e=(G('em').value||'').trim().toLowerCase();
   if(!e||e.indexOf('@')<1){gmsg('Enter your email.');return}
+  try{localStorage.setItem('h2_remember',G('rem').checked?'1':'0')}catch(e){}
   G('send').disabled=true;gmsg('Sending...');
   const {error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
   G('send').disabled=false;
