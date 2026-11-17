@@ -104,13 +104,13 @@ details p{color:var(--dim);margin:10px 0 0}
   <h2>Real alerts</h2>
   <p class="sub">Straight from the scanner: the alert on the left, what the stock did on the right. Click a picture to see it full size.</p>
   <div class="grid">
-    <div class="card" style="padding:12px"><a href="ex_GMM.png" target="_blank"><img src="ex_GMM.png" alt="GMM HOT 2 alert and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
+    <div class="card" style="padding:12px"><a href="ex_GMM.png" class="zoom"><img src="ex_GMM.png" alt="GMM HOT 2 alert and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
       <span class="tag t4" style="margin-top:12px">HOT 2 &middot; GOLD</span><h3>GMM &middot; Mon 11-16</h3>
       <p>First alert of the day with 100k behind it: alerted at <b style="color:#e7edf5">$1.56</b> at 8:30:54. High <b style="color:#3fd07a">$6.11</b> by 8:50.</p></div>
-    <div class="card" style="padding:12px"><a href="ex_GANX.png" target="_blank"><img src="ex_GANX.png" alt="GANX Under the lines alert and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
+    <div class="card" style="padding:12px"><a href="ex_GANX.png" class="zoom"><img src="ex_GANX.png" alt="GANX Under the lines alert and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
       <span class="tag t3" style="margin-top:12px">UNDER THE LINES &middot; EARLY MOVING ALERT</span><h3>GANX &middot; Tue 11-17</h3>
       <p>Box breakout on 176k a minute while still under the lines: flagged at <b style="color:#e7edf5">$1.05</b>, <b style="color:#e7edf5">5 minutes before HOT 2</b>. High <b style="color:#3fd07a">$1.30</b>.</p></div>
-    <div class="card" style="padding:12px"><a href="ex_OMH.png" target="_blank"><img src="ex_OMH.png" alt="OMH premarket high re-break and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
+    <div class="card" style="padding:12px"><a href="ex_OMH.png" class="zoom"><img src="ex_OMH.png" alt="OMH premarket high re-break and chart" loading="lazy" style="width:100%;border-radius:8px;display:block"></a>
       <span class="tag t4" style="margin-top:12px">GOLD &middot; THE RETEST</span><h3>OMH &middot; Tue 11-17</h3>
       <p>Broke the premarket high, fell back under it, then broke it <b style="color:#e7edf5">again on 300k</b> at 11:30: gold again at <b style="color:#e7edf5">$4.22</b>. High <b style="color:#3fd07a">$5.93</b>.</p></div>
   </div>
@@ -160,5 +160,14 @@ details p{color:var(--dim);margin:10px 0 0}
   <p>By purchasing or using a HOT 2 Scanner membership you agree to our <a href="terms.html" style="color:#7cc4f5">Terms of Service &amp; Membership Agreement</a>, including the no-refund policy, the arbitration and class-action waiver, and the limits of liability.</p>
   <p>© 2026 HOT 2 Scanner. All rights reserved.</p>
 </footer>
+<div id="lb" onclick="lbClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;padding:16px;cursor:zoom-out">
+<button onclick="lbClose()" aria-label="Close" style="position:fixed;top:14px;right:14px;background:#ffd000;color:#111;border:0;border-radius:8px;font-weight:800;font-size:18px;padding:10px 16px;cursor:pointer">&#10005; Close</button>
+<img id="lbimg" alt="" style="max-width:100%;max-height:100%;border-radius:8px"></div>
+<script>
+function lbClose(){document.getElementById('lb').style.display='none';document.body.style.overflow=''}
+document.querySelectorAll('a.zoom').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();
+  document.getElementById('lbimg').src=a.getAttribute('href');document.getElementById('lb').style.display='flex';document.body.style.overflow='hidden'}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')lbClose()});
+</script>
 </body>
 </html>
