@@ -636,6 +636,15 @@ async function start(session){
   if(!chan){chan=sb.channel('board').on('postgres_changes',{event:'UPDATE',schema:'public',table:'board'},p=>{
      if(p&&p.new&&p.new.data){DATA=p.new.data;LAST_AT=new Date(p.new.updated_at)}}).subscribe()}
   setInterval(pull,15000);setInterval(tick,1000);tick()}
+// 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
+// and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
+const H2_BUILD='1795015189';
+setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
+  const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
+try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
+  const u=document.createElement('div');u.id='h2upd';u.textContent='✅ Scanner updated to the newest version. Click anywhere to turn the bells back on.';
+  u.style.cssText='position:fixed;top:0;left:0;right:0;z-index:60;background:#1d4d2b;color:#fff;font-weight:800;text-align:center;padding:10px;cursor:pointer;border-bottom:2px solid #ffd000';
+  document.body.appendChild(u);document.addEventListener('click',()=>u.remove(),{once:true})}}catch(e){}
 sb.auth.getSession().then(({data})=>start(data.session));
 sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN')start(session)});
 </script>
