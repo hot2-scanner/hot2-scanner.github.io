@@ -151,7 +151,7 @@ tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td
 <h2 style="color:#f5c542">&#128276; HOT 2 ALERTS <span class="dim" id="alsub"></span></h2>
 <div class="alertbox" id="alerts"><div class="empty">loading...</div></div>
 
-<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">momentum BEFORE it reaches YHOD: 100k/min + up 10%, still UNDER YHOD (yesterday's high incl. pre + after hours) &middot; from 9:30 also FRESH = 1st 100k green candle under today's PM high &middot; top 5 by volume (new FRESH pinned 3 min) &middot; look only &middot; <span id="ulsub"></span></span></h2>
+<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">momentum BEFORE it reaches YHOD: 100k/min + up 10%, still UNDER YHOD (yesterday's high incl. pre + after hours) &middot; from 9:30 also FRESH = 1st 100k green candle under PMHOD (today's premarket high) &middot; top 5 by volume (new FRESH pinned 3 min) &middot; look only &middot; <span id="ulsub"></span></span></h2>
 <div class="ulbox" id="under"><div class="empty">loading...</div></div>
 
 <h2 class="yl">&#128293; HOT NOW <span class="dim" id="hnsub"></span></h2>
@@ -558,8 +558,8 @@ async function loadUnder(){
     +(r.vnow?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vnow)+'/min</span>':'')
     +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">on HOT 2 '+r.hot2+'</span>':'')
     +'<span class="v1chip" title="shares in the trigger candle">'+big(r.vol)+' in '+(r.candle||'')+'</span>'
-    +lnTag('PM HIGH',r.pmh,r.now||r.px)
-    +'<span class="arght dim">'+(((r.pmh/(r.now||r.px))-1)*100).toFixed(1)+'% to the PM high</span></div></div>'
+    +lnTag('PMHOD',r.pmh,r.now||r.px)
+    +'<span class="arght dim">'+(((r.pmh/(r.now||r.px))-1)*100).toFixed(1)+'% to PMHOD</span></div></div>'
    :'<div class="ulrow"><div class="aline"><span class="ulat">'+(r.at||'')+'</span>'
     +'<span class="sym">'+r.sym+'</span><span>'+(+r.px).toPrecision(4)+'</span>'
     +(r.now?'<span class="dim">now '+(+r.now).toPrecision(4)+'</span>':'')
@@ -630,7 +630,7 @@ async function start(session){
   setInterval(pull,15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795015572';
+const H2_BUILD='1795015915';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
