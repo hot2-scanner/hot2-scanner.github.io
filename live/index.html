@@ -110,6 +110,7 @@ tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
 </style></head><body>
 <h1 style="font-size:22px;letter-spacing:1px">HOT 2 <span style="color:#ff3df0">SCANNER</span></h1>
 <div class="sub" id="hdr">loading...</div>
+<button id="bellbtn" onclick="bellToggle()" style="border:1px solid #ffd000;border-radius:6px;padding:3px 10px;font-weight:800;font-size:12px;cursor:pointer;margin:2px 0 6px;background:#5a4300;color:#fff">&#128276; Gold bell</button>
 <div class="volbar" id="volnote"></div>
 <div class="k100" id="k100"></div>
 <div id="goldbar" style="display:none;border:3px solid #ffd000;color:#fff;font-weight:800;font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px;animation:g1blink 1s ease-in-out infinite"></div>
@@ -222,7 +223,32 @@ async function loadGold(){let j;
   if(g.length){b.style.display='block';b.innerHTML=g.map(o=>'&#11088; '+GLINE+' BREAK + 100K: <b>'+o.sym+'</b> '+(+o.px).toPrecision(4)
      +' &nbsp;broke '+(GLINE=='DAY HIGH'?"today's high (9:30-4:00) ":'the premarket high ')+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
   else b.style.display='none';
-  document.querySelectorAll('.arow[data-s]').forEach(r=>r.classList.toggle('pmhgold',!!GOLDSET[r.dataset.s]));}
+  document.querySelectorAll('.arow[data-s]').forEach(r=>r.classList.toggle('pmhgold',!!GOLDSET[r.dataset.s]));
+  bellCheck();}
+// 11-17 his ask: a BELL for the gold (no more desktop pop-ups). Rings once for each NEW gold: a new PM-high / day-high break
+// (sym + its 'since' time, so a re-break after a retest rings again) or a new blinking first-alert-+-100k row.
+// Browsers only allow sound after one click on the page; the button shows when that is still needed. Off/on is remembered.
+let BELL_ON=true,BELL_SEEN=null,_ac=null,BELL_READY=false;   // READY = sound allowed by a click on this page
+try{BELL_ON=localStorage.getItem('h2_bell')!=='0'}catch(e){}
+function _actx(){if(!_ac){try{_ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return _ac}
+function bellSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
+  [0,0.22,0.44].forEach((d,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=[1568,1319,1568][i];
+    g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.35,ac.currentTime+d+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.6);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.65)})}
+function bellBtn(){const b=$('bellbtn');if(!b)return;const ac=_ac;const needClick=BELL_ON&&(!BELL_READY||!ac||ac.state!=='running');
+  b.textContent=!BELL_ON?'\uD83D\uDD15 Gold bell OFF':(needClick?'\uD83D\uDD14 Click to allow the gold bell':'\uD83D\uDD14 Gold bell ON');
+  b.style.background=!BELL_ON?'#262b35':(needClick?'#5a4300':'#1d4d2b');b.style.color=!BELL_ON?'#8a93a3':'#fff'}
+function bellToggle(){const ac=_actx();if(ac&&ac.state==='suspended')ac.resume().then(bellBtn);
+  if(BELL_ON&&!BELL_READY){BELL_READY=true;bellSound();bellBtn();return}     // first click = allow sound + a test ring, NOT off
+  BELL_READY=true;BELL_ON=!BELL_ON;try{localStorage.setItem('h2_bell',BELL_ON?'1':'0')}catch(e){};if(BELL_ON)bellSound();bellBtn()}
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='bellbtn')return;const ac=_actx();if(!ac)return;
+  BELL_READY=true;if(ac.state==='suspended')ac.resume().then(bellBtn);else bellBtn()},true);
+function bellCheck(){const now=new Set();
+  Object.values(GOLDSET).forEach(o=>now.add('B|'+o.sym+'|'+o.since));
+  document.querySelectorAll('.arow.first1gold[data-s]').forEach(r=>now.add('F|'+r.dataset.s));
+  if(BELL_SEEN===null){BELL_SEEN=now;bellBtn();return}          // first look after the page opens: no ring for old gold
+  let fresh=false;now.forEach(k=>{if(!BELL_SEEN.has(k)){fresh=true;BELL_SEEN.add(k)}});
+  if(fresh&&BELL_ON)bellSound();bellBtn()}
 let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
 function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
   if(etMin()<570||!x||!L||!x.px){PMHG[s]=false;return}
