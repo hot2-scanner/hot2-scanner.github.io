@@ -263,7 +263,7 @@ function bellSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac
     g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.35,ac.currentTime+d+0.01);
     g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.6);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.65)})}
 function bellBtn(){const b=$('bellbtn');if(!b)return;const ac=_ac;const needClick=BELL_ON&&(!BELL_READY||!ac||ac.state!=='running');
-  b.textContent=!BELL_ON?'\uD83D\uDD15 Bells OFF':(needClick?'\uD83D\uDD14 Click to allow the bells':'\uD83D\uDD14 Bells ON: gold chime + push beeps');
+  b.textContent=!BELL_ON?'\uD83D\uDD15 Bells OFF':(needClick?'\uD83D\uDD14 Click to allow the bells':'\uD83D\uDD14 Bells ON: gold chime + push sound');
   b.style.background=!BELL_ON?'#262b35':(needClick?'#5a4300':'#1d4d2b');b.style.color=!BELL_ON?'#8a93a3':'#fff'}
 function bellToggle(){const ac=_actx();if(ac&&ac.state==='suspended')ac.resume().then(bellBtn);
   if(BELL_ON&&!BELL_READY){BELL_READY=true;bellSound();bellBtn();return}     // first click = allow sound + a test ring, NOT off
@@ -495,9 +495,13 @@ async function load100k(){
 }
 let PUSH_SEEN=null;
 function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
-  [0,0.3].forEach(d=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=330;
-    g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.45,ac.currentTime+d+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.25);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.28)})}
+  // 11-18 his ask (the old beeps "sound like Atari"): a smooth low PLUCK + soft echo, two notes going UP (C4 -> G4)
+  const t0=ac.currentTime+0.02,dl=ac.createDelay(),fb=ac.createGain(),wet=ac.createGain();
+  dl.delayTime.value=0.18;fb.gain.value=0.35;wet.gain.value=0.5;dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(ac.destination);
+  [[262,0],[392,0.14]].forEach(([f,d])=>[ac.destination,dl].forEach((out,k)=>{const o=ac.createOscillator(),lp=ac.createBiquadFilter(),g=ac.createGain();
+    o.type='triangle';o.frequency.value=f;lp.type='lowpass';lp.frequency.value=1200;
+    g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(k?0.3:0.45,t0+d+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.5);
+    o.connect(lp);lp.connect(g);g.connect(out);o.start(t0+d);o.stop(t0+d+0.55)}))}
 // 11-18 his ask: "a bell on the ticker that's ringing" -- WHO rang, WHY, and WHEN. Bar on top + bell on the ticker's
 // card and board rows: shakes for 2 min, then a still bell with the time. Saved per day in this browser.
 const RING_MS=120000;let RANG=[],BSEEN=null;
@@ -524,7 +528,7 @@ function ringPaint(){
     b.className=r.kind+(live?' live':'');b.style.display='flex';
     b.innerHTML='<span class="rbell'+(live?' ringing':'')+'" style="font-size:24px;color:'+(r.kind==='push'?'#ff6b6b':'#ffc83d')+'">&#128276;</span>'
       +'<div style="flex:1"><div class="rbt">'+r.sym+' rang &middot; '+r.at+'</div>'
-      +'<div class="rbw">'+(r.kind==='push'?'Push beeps':'Gold chime')+' &middot; '+r.why
+      +'<div class="rbw">'+(r.kind==='push'?'Push sound':'Gold chime')+' &middot; '+r.why
       +(r.vol?' &middot; '+big(r.vol)+' this minute':'')+(r.px?' &middot; $'+(r.px<1?(+r.px).toFixed(4):(+r.px).toFixed(2)):'')+'</div></div>'
       +'<span class="dim" style="font-size:11px">click = jump to it</span>'}
   const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.slice(1,7).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':' gold')+'</span>').join(''):'';
@@ -630,7 +634,7 @@ async function start(session){
   setInterval(pull,15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795015915';
+const H2_BUILD='1795019001';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
