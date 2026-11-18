@@ -737,11 +737,17 @@ G('send').onclick=async()=>{const e=(G('em').value||'').trim().toLowerCase();
   gmsg(error?('Could not send: '+(/not.*(found|allowed)|signups/i.test(error.message)?'that email is not a member.':error.message)):'Check your email and click the sign-in link (it can take a minute).')};
 G('out').onclick=async()=>{await sb.auth.signOut();location.reload()};
 let chan=null;
+// 11-18 (free Supabase plan): the feed now sends the screen PACKED (gzip, ~14 KB instead of ~48 KB). unpack() reads both.
+async function unpack(d){if(!d||!d.z)return d;
+  const bin=Uint8Array.from(atob(d.z),c=>c.charCodeAt(0));
+  const st=new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return JSON.parse(await new Response(st).text())}
+let LAST_RT=0;
 async function pull(){
   const {data,error}=await sb.from('board').select('data,updated_at').eq('id',1).maybeSingle();
   if(error){gmsg('Error: '+error.message);return false}
   if(!data){return false}
-  DATA=data.data;LAST_AT=new Date(data.updated_at);return true}
+  try{DATA=await unpack(data.data)}catch(e){return false}LAST_AT=new Date(data.updated_at);return true}
 function tick(){if(!LAST_AT)return;const age=(Date.now()-LAST_AT.getTime())/1000;
   const s=G('live');s.classList.toggle('stale',age>90);
   G('lt').textContent=age>90?('scanner offline - last update '+LAST_AT.toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'):'live'}
@@ -754,11 +760,12 @@ async function start(session){
   G('gate').style.display='none';G('live').style.display='block';
   try{all();load100k();loadUnder();loadGold()}catch(e){}
   if(!chan){chan=sb.channel('board').on('postgres_changes',{event:'UPDATE',schema:'public',table:'board'},p=>{
-     if(p&&p.new&&p.new.data){DATA=p.new.data;LAST_AT=new Date(p.new.updated_at)}}).subscribe()}
-  setInterval(pull,15000);setInterval(tick,1000);tick()}
+     if(p&&p.new&&p.new.data){const at=new Date(p.new.updated_at);unpack(p.new.data).then(d=>{DATA=d;LAST_AT=at;LAST_RT=Date.now()}).catch(()=>{})}}).subscribe()}
+  // backup pull ONLY when the live connection has been quiet for 20 s (it used to download the whole screen every 15 s on top)
+  setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795032147';
+const H2_BUILD='1795032366';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
