@@ -47,7 +47,12 @@ h2{font-size:30px;margin:0 0 8px}
 .chip{background:var(--hot);color:#fff;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px}
 .why{color:var(--yel);font-size:12px}
 .steps{counter-reset:s}.steps .card h3::before{counter-increment:s;content:counter(s) ". ";color:var(--hot)}
-.price{max-width:460px;margin:0 auto;text-align:center;border:2px solid var(--hot)}
+.price{text-align:center;border:2px solid var(--hot);position:relative}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;max-width:780px;margin:0 auto}
+.price.yr{border-color:var(--grn);box-shadow:0 0 22px rgba(63,208,122,.25)}
+.price .best{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--grn);color:#08130c;font-weight:800;font-size:12px;padding:3px 12px;border-radius:999px;white-space:nowrap}
+.price h3{margin:6px 0 4px;font-size:20px}
+.btn.green{background:var(--grn);color:#08130c;box-shadow:0 0 22px rgba(63,208,122,.35)}
 .price .big{font-size:44px;font-weight:800}.price .big small{font-size:18px;color:var(--dim);font-weight:600}
 .price ul{text-align:left;color:var(--dim);padding-left:20px;margin:18px 0 22px}
 .price li{margin:6px 0}
@@ -121,7 +126,7 @@ details p{color:var(--dim);margin:10px 0 0}
   <h2>How it works</h2>
   <p class="sub">No software to install.</p>
   <div class="grid steps">
-    <div class="card"><h3>Join</h3><p>Pay $199 through secure checkout (Stripe). That covers setup and your first month; $79/month starts one month after you join.</p></div>
+    <div class="card"><h3>Join</h3><p>Pick monthly ($50) or yearly ($365, just $1 a day) and pay through secure checkout (Stripe). No join fee.</p></div>
     <div class="card"><h3>Sign in</h3><p>Open the members page and sign in with the email you paid with. We email you a sign-in link, no password to remember.</p></div>
     <div class="card"><h3>Watch it live</h3><p>The full scanner screen in your browser: breakouts, HOT 2 alerts with the 100K flag, UNDER THE LINES and HOT NOW, updating every few seconds.</p></div>
   </div>
@@ -129,19 +134,34 @@ details p{color:var(--dim);margin:10px 0 0}
 
 <section id="pricing"><div class="wrap">
   <h2 style="text-align:center">Pricing</h2>
-  <p class="sub" style="text-align:center">One payment to join (first month included), then a monthly membership. Cancel any time.</p>
+  <p class="sub" style="text-align:center">No join fee. Pick a plan, cancel any time.</p>
+  <div class="prices">
   <div class="card price">
-    <div class="big">$199 <small>to join, first month included</small></div>
-    <div class="big" style="font-size:30px">then $79 <small>/ month</small></div>
+    <h3>Monthly</h3>
+    <div class="big">$50 <small>/ month</small></div>
     <ul>
-      <li>All alert types: HOT 2, 100K flag, UNDER THE LINES, HOT NOW</li>
+      <li>All alert types: HOT 2, gold breaks, 100K flag, UNDER THE LINES, HOT NOW</li>
       <li>Live from 4:00 AM ET through after-hours</li>
       <li>The live scanner screen in your browser (computer or phone)</li>
-      <li>Cancel the monthly membership any time (all payments final)</li>
+      <li>Cancel any time</li>
     </ul>
-    <a class="btn" href="https://buy.stripe.com/8x214nfuF0cselh4ts0gw00">Join now</a>
-    <p style="font-size:13px;color:var(--dim);margin:14px 0 0">By joining you agree to the <a href="terms.html" style="color:#7cc4f5">Terms of Service</a>. All payments are final, no refunds. Not financial advice.</p>
+    <a class="btn" href="https://buy.stripe.com/bJe5kD4Q17EU7WT6BA0gw01">Join monthly</a>
   </div>
+  <div class="card price yr">
+    <span class="best">BEST VALUE &middot; SAVE $235</span>
+    <h3>Yearly</h3>
+    <div class="big">$365 <small>/ year</small></div>
+    <div style="color:var(--grn);font-weight:800;margin-top:-4px">just $1 a day</div>
+    <ul>
+      <li>Everything in Monthly</li>
+      <li>12 months for the price of about 7</li>
+      <li>One payment, nothing to think about all year</li>
+      <li>Cancel the renewal any time</li>
+    </ul>
+    <a class="btn green" href="https://buy.stripe.com/fZudR90zLbVaelh5xw0gw02">Join yearly</a>
+  </div>
+  </div>
+  <p style="font-size:13px;color:var(--dim);margin:16px auto 0;text-align:center;max-width:780px">By joining you agree to the <a href="terms.html" style="color:#7cc4f5">Terms of Service</a>. All payments are final, no refunds. Not financial advice. Prices in USD; sales tax may be added at checkout.</p>
 </div></section>
 
 <section id="faq"><div class="wrap">
@@ -150,8 +170,8 @@ details p{color:var(--dim);margin:10px 0 0}
   <details><summary>How do I see the scanner after I pay?</summary><p>Go to <a href="live/">the members page</a> and sign in with the email you paid with. Access turns on within a few minutes on weekdays (4 AM to 8 PM ET); payments made at night or on weekends open at 4 AM the next weekday.</p></details>
   <details><summary>What do all the colors and labels mean?</summary><p>There's a full guide here: <a href="guide.html">How to read the screen</a>. It's also linked at the top of the members page.</p></details>
   <details><summary>Does it trade for me?</summary><p>No. It's an alert service. You decide what to trade and you place your own orders with your own broker.</p></details>
-  <details><summary>Can I get a refund?</summary><p>We keep things simple and honest: <b>every payment is final, and we don't offer refunds for any reason.</b> Think of it like a ticket to the show. Once you're in, the seat is yours for the month, whether you watch every minute or step out for coffee. The good news? You're never locked in. Cancel any time and you keep your access right up to the last day you paid for. We'd love to have you stay for the long run. &#128156;</p></details>
-  <details><summary>How do I cancel?</summary><p>Cancel the monthly membership any time at <a href="https://billing.stripe.com/p/login/8x214nfuF0cselh4ts0gw00">Manage my membership</a> (sign in with the email you paid with). You keep access until the end of the month you paid for.</p></details>
+  <details><summary>Can I get a refund?</summary><p>We keep things simple and honest: <b>every payment is final, and we don't offer refunds for any reason.</b> Think of it like a ticket to the show. Once you're in, the seat is yours for the month (or year), whether you watch every minute or step out for coffee. The good news? You're never locked in. Cancel any time and you keep your access right up to the last day you paid for. We'd love to have you stay for the long run. &#128156;</p></details>
+  <details><summary>How do I cancel?</summary><p>Cancel any time at <a href="https://billing.stripe.com/p/login/8x214nfuF0cselh4ts0gw00">Manage my membership</a> (sign in with the email you paid with). You keep access until the end of the month or year you paid for.</p></details>
   </div></section>
 </main>
 
