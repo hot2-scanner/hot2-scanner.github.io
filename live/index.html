@@ -115,7 +115,28 @@ tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td
 .ulat{color:#1fd3ea;font-weight:700;margin-right:6px}
 .lnU{background:#3a1420;color:#ff8fa8;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px}
 .lnA{background:#123524;color:#2ecc71;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px}
-</style></head><body>
+</style><style>
+body{font-variant-numeric:tabular-nums}
+.calmglow{animation:none!important;box-shadow:0 0 12px #ffd00088!important}
+#goldbar.gidle{display:block!important;border:1px dashed #3a4150!important;color:#8a93a3!important;font-size:13px!important;
+  font-weight:400!important;background:#151922!important;animation:none!important}
+#goldbar,#goldbar.gidle{display:none!important}
+.gstar{display:inline-block;font-size:11px;font-weight:800;padding:1px 6px;border-radius:5px;margin:0 4px;background:#3a2a05;color:#d9b85a;white-space:nowrap}
+.gstar.on{background:#ffd000;color:#3a2a05}
+.bxtag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;margin:0 4px;
+  border:1px solid #4a5568;color:#c9d1dd;background:#1b2029;white-space:nowrap}
+.bxtag.both{border:1.5px dashed #e6ecf5;color:#fff;background:transparent}
+.ulrow.calminbox{outline:2px dashed #e6ecf5;outline-offset:-2px}
+td.sym{width:210px;min-width:210px;max-width:210px;white-space:nowrap;vertical-align:middle}
+td.sym .sigline{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;vertical-align:middle;margin-left:8px}
+td.sym .sigline>*{line-height:14px}
+td.sym .pmT,td.sym .rbwrap{display:none}
+td.sym .gstar,td.sym .bxtag,td.sym .puW,td.sym .pmW{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:4px;margin:0}
+td.sym .puW{background:#3b0d12;color:#ff8a8a}
+tr.k100row td.sym::after{display:none!important}
+td.sym .puW.live{background:#ff2b2b;color:#2a0507}
+td.sym .pmW{border:1px solid #6b5a10;color:#ffd000}
+</style><script src="https://cdn.jsdelivr.net/npm/morphdom@2.7.4/dist/morphdom-umd.min.js"></script></head><body>
 <h1 style="font-size:22px;letter-spacing:1px">HOT 2 <span style="color:#ff3df0">SCANNER</span></h1>
 <div class="sub" id="hdr">loading...</div>
 <button id="bellbtn" onclick="bellToggle()" style="border:1px solid #ffd000;border-radius:6px;padding:3px 10px;font-weight:800;font-size:12px;cursor:pointer;margin:2px 0 6px;background:#5a4300;color:#fff">&#128276; Gold bell</button>
@@ -572,7 +593,107 @@ async function loadUnder(){
     +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)
     +'<span class="arght dim">broke out of box '+(+r.bot).toPrecision(4)+'-'+(+r.top).toPrecision(4)+' (1m + 5m)</span></div></div>').join('');
 }
-all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);ringPaint();setInterval(ringPaint,1500);loadBells();setInterval(loadBells,3000);
+</script>
+<script>
+// ---------------- CALM layer (test copy, 11-18) ----------------
+// classes other code turns on/off by itself (it re-checks them every few seconds) -> keep them until that code changes
+// them, so a redraw doesn't flash them off and on
+const CALM_KEEP=['calmglow','pmhabove','k100row','inboxtr','ptr','goldtr','big100','first1gold','pmhgold','goldrow'];
+const symOf=c=>((c.textContent||'').trim().match(/^[A-Z][A-Z0-9.]*/)||[''])[0];
+function calmKey(n){if(n.nodeType!==1)return null;if(n.id)return n.id;if(n.dataset&&n.dataset.s)return 's:'+n.dataset.s;
+  if(n.tagName==='TR'){const c=n.querySelector('td.sym');if(c)return 'tr:'+symOf(c)}return null}
+function calmMorph(real,ghost){morphdom(real,ghost,{getNodeKey:calmKey,
+  onBeforeElUpdated:(f,t)=>{
+    if(f.tagName==='TD'&&f.classList.contains('sym')&&symOf(f)===symOf(t))return false;   // keep its ▲PMH / bell marks
+    CALM_KEEP.forEach(c=>{if(f.classList.contains(c)&&!t.classList.contains(c))t.classList.add(c)});
+    return !f.isEqualNode(t)}})}
+// draw on an OFF-SCREEN copy (getElementById hands the drawing code the copy; the screen keeps the real one untouched),
+// then change only what differs on the real one -> the same cards/rows stay on screen, blinking doesn't restart
+const CALM_G={};const _gid=document.getElementById.bind(document);
+document.getElementById=id=>CALM_G[id]||_gid(id);
+function calmWrap(name,ids){const orig=window[name];if(!orig)return;
+  window[name]=async function(...a){const sw=[];
+    ids.forEach(id=>{if(CALM_G[id])return;const r=_gid(id);if(!r)return;const g=r.cloneNode(true);CALM_G[id]=g;sw.push([id,r,g])});
+    try{return await orig.apply(this,a)}finally{sw.forEach(([id,r,g])=>{delete CALM_G[id];try{starPaint(g);boxPaint(g);sigPaint(g)}catch(e){}
+      if(name==='loadGold'&&g.style.display==='none'){g.className='gidle';g.innerHTML='&#11088; No gold right now'}
+      else if(name==='loadGold'){g.classList.remove('gidle')}
+      try{calmMorph(r,g)}catch(e){r.innerHTML=g.innerHTML;r.className=g.className}})}}}
+calmWrap('loadBrk',['t_brk']);
+calmWrap('loadAlerts',['alerts']);
+calmWrap('loadHot',['t_hot']);
+calmWrap('loadUnder',['under']);
+calmWrap('loadGold',['goldbar']);
+calmWrap('ringPaint',['ringbar','ringlist']);
+// 11-18 HIS PICK: no big yellow gold box on top -> a STAR on the stock itself (card + board rows), like the bell.
+// Bright star = gold right now; it shows the FIRST gold time today and the latest re-break (gold still re-alerts on a
+// retest, as the website says). Dim star = it was gold earlier today. The bell bar still says when gold rang.
+function starInfo(s){const bs=(RANG||[]).filter(r=>r.sym===s&&r.key&&r.key.indexOf('B|')===0).sort((a,b)=>a.t-b.t);
+  const on=GOLDSET&&GOLDSET[s];if(!on&&!bs.length)return null;
+  const first=bs.length?bs[0].at.slice(0,5):(on.since||'').slice(0,5);const last=on?(on.since||'').slice(0,5):bs[bs.length-1].at.slice(0,5);
+  return {on:!!on,first,last}}
+function starHtml(s,small){const i=starInfo(s);if(!i)return '';
+  return '<span class="gstar'+(i.on?' on':'')+'">'+(small?'':'&#11088; ')+'GOLD '+i.first+(i.last&&i.last!==i.first?(small?' &middot; ':' &middot; again ')+i.last:'')+'</span>'}
+function starPaint(root){root=root||document;
+  root.querySelectorAll('.arow[data-s] .aline .sym, td.sym').forEach(el=>{
+    const s=el.closest('.arow')?el.closest('.arow').dataset.s:symOf(el);const isTd=el.tagName==='TD';
+    let sp=isTd?el.querySelector('.gswrap'):el.parentNode.querySelector(':scope > .gswrap');const h=starHtml(s,false);
+    if(!h){if(sp)sp.remove();return}
+    if(!sp){sp=document.createElement('span');sp.className='gswrap';if(isTd)el.appendChild(sp);else el.insertAdjacentElement('afterend',sp)}
+    if(sp.innerHTML!==h)sp.innerHTML=h})}
+setInterval(()=>starPaint(),1500);
+// 11-18 HIS DESIGN: dashed outline ONLY when it sits in BOTH boxes (1-min + 5-min, the IN THE BOX the page already
+// draws); in only ONE box = a small tag "1M BOX lo-hi since" / "5M BOX lo-hi since", no outline. From 100K HERE (:8799).
+let BOXES={};
+async function loadBoxes(){try{const f=await (await fetch('http://127.0.0.1:8799/state',{cache:'no-store'})).json();BOXES=f.boxes||{}}catch(e){}boxPaint()}
+const p4=x=>(+x).toPrecision(4);
+function boxHtml(s,small){const b=BOXES[s];if(!b)return '';
+  if(b.state==='both')return small?'<span class="bxtag both">1M+5M BOX</span>':'';     // the card already has IN THE BOX
+  const lo=b.state==='1m'?b.box1_lo:b.box5_lo,hi=b.state==='1m'?b.box1_hi:b.box5_hi;
+  return '<span class="bxtag">'+(b.state==='1m'?'1M':'5M')+' BOX'+(small?'':' '+p4(lo)+' &ndash; '+p4(hi)+' &middot; since '+b.since)+'</span>'}
+function boxPaint(root){root=root||document;
+  root.querySelectorAll('.arow[data-s] .aline .sym, td.sym, .ulrow .aline .sym').forEach(el=>{
+    const card=el.closest('.arow'),ul=el.closest('.ulrow'),isTd=el.tagName==='TD';
+    const s=card?card.dataset.s:symOf(el);
+    if(ul)ul.classList.toggle('calminbox',!!(BOXES[s]&&BOXES[s].state==='both'));
+    const h=boxHtml(s,isTd)+(ul&&BOXES[s]&&BOXES[s].state==='both'?'<span class="bxtag both">IN 1M + 5M BOX</span>':'');
+    let sp=isTd?el.querySelector('.bxwrap'):el.parentNode.querySelector(':scope > .bxwrap');
+    if(!h){if(sp)sp.remove();return}
+    if(!sp){sp=document.createElement('span');sp.className='bxwrap';if(isTd)el.appendChild(sp);else el.parentNode.appendChild(sp)}
+    if(sp.innerHTML!==h)sp.innerHTML=h})}
+loadBoxes();setInterval(loadBoxes,3000);
+// 11-18 HIS PICK (idea B): in the board tables the signal WORDS go on a SECOND LINE under the ticker. Every row is
+// 2 lines tall (blank line if no signal), the ticker column has a fixed width -> no column ever gets pushed sideways.
+function sigPaint(root){root=root||document;
+  root.querySelectorAll('td.sym').forEach(td=>{let sl=td.querySelector(':scope > .sigline');
+    if(!sl){sl=document.createElement('span');sl.className='sigline';td.appendChild(td.ownerDocument.createTextNode(' '));td.appendChild(sl)}   // the space keeps the ticker readable as its own word
+    ['.gswrap','.rbwrap','.bxwrap'].forEach(q=>{const e=td.querySelector(':scope > '+q);if(e)sl.appendChild(e)});
+    // the push word, short: "PUSH 12:25" (gold already has its own GOLD word)
+    const rl=ringLast(symOf(td));let pu=sl.querySelector('.puW');const red=!!td.closest('tr.k100row');
+    const pwTxt=red?'CONSOLIDATION PUSH'+(rl&&rl.kind==='push'?' '+rl.at.slice(0,5):''):(rl&&rl.kind==='push'?'🔔 PUSH '+rl.at.slice(0,5):'');
+    if(pwTxt){if(!pu){pu=document.createElement('span');pu.className='puW';const bx=sl.querySelector('.bxwrap');sl.insertBefore(pu,bx||null)}if(pu.textContent!==pwTxt)pu.textContent=pwTxt;pu.classList.toggle('live',red)}
+    else if(pu)pu.remove();
+    const pt=td.querySelector('.pmT');let pw=sl.querySelector('.pmW');
+    if(pt){const w=pt.textContent.indexOf('HOD')>=0?'▲ ABOVE HOD':'▲ ABOVE PMH';if(!pw){pw=document.createElement('span');pw.className='pmW';sl.appendChild(pw)}if(pw.textContent!==w)pw.textContent=w}
+    else if(pw)pw.remove();
+    const empty=!sl.querySelector('.gswrap,.puW,.bxwrap,.pmW');sl.style.display=empty?'none':'';
+    if(!empty&&sl.firstChild&&sl.firstChild.nodeType===3)sl.firstChild.remove();
+    sl.title=sl.textContent.trim()})}
+setInterval(()=>sigPaint(),500);
+// blink only the first ~10 s of each gold, then a steady glow
+const CALM_T={};
+setInterval(()=>{const now=Date.now(),seen={};
+  document.querySelectorAll('.arow.first1gold,.arow.pmhgold,#goldbar:not(.gidle)').forEach(e=>{
+    const k=(e.id||e.dataset.s)+'|'+(e.id==='goldbar'?e.textContent.replace(/[\d.,]+[kM]?/g,'').slice(0,80):e.className.indexOf('pmhgold')>=0?'p':'f');
+    seen[k]=1;if(!CALM_T[k])CALM_T[k]=now;e.classList.toggle('calmglow',now-CALM_T[k]>10000)});
+  document.querySelectorAll('.calmglow').forEach(e=>{if(!e.matches('.arow.first1gold,.arow.pmhgold,#goldbar:not(.gidle)'))e.classList.remove('calmglow')});
+  Object.keys(CALM_T).forEach(k=>{if(!seen[k])delete CALM_T[k]})},1000);
+// sections never shrink back (no jumping); forget the max every 10 min
+const CALM_H={};let CALM_RESET=Date.now();
+setInterval(()=>{if(Date.now()-CALM_RESET>600000){CALM_RESET=Date.now();for(const k in CALM_H)delete CALM_H[k]}
+  ['ringlist','goldbar','alerts','under','t_brk','t_hot','volnote','k100'].forEach(id=>{const e=document.getElementById(id);if(!e||e.dataset.calmghost)return;
+    e.style.minHeight='';const h=e.offsetHeight;CALM_H[id]=Math.max(CALM_H[id]||0,h);e.style.minHeight=CALM_H[id]+'px'})},1000);
+</script>
+<script>all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);ringPaint();setInterval(ringPaint,1500);loadBells();setInterval(loadBells,3000);
 </script><style>
 #gate{position:fixed;inset:0;background:#0f1115;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#171a21;border:1px solid #262b35;border-radius:12px;padding:24px}
@@ -634,7 +755,7 @@ async function start(session){
   setInterval(pull,15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795019001';
+const H2_BUILD='1795024495';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
