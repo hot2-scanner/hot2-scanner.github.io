@@ -98,6 +98,9 @@ tr.vtoprow td{box-shadow:inset 0 0 0 9999px rgba(255,216,77,.10)}
  font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px}
 tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
 .arow.k100row{border:2px solid #ff3030!important;box-shadow:0 0 12px #ff3030}
+/* 11-17 his name for it: CONSOLIDATION PUSH (was "100K HERE") -- a red tag on the red row so it says what it is */
+.arow.k100row .aline::after,tr.k100row td:nth-child(3)::after{content:'CONSOLIDATION PUSH';background:#ff3030;color:#fff;
+ font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;margin-left:6px;white-space:nowrap}
 
 /* UNDER THE LINES, his OK 2026-11-14: names NOT on HOT 2 yet doing 100k+/min that just broke out of the 1m AND 5m box.
    Own box, own color (cyan), from box_alert/under_lines/under_lines.py on :8792. It never takes a HOT 2 row's place. */
@@ -236,7 +239,7 @@ function bellSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac
     g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.35,ac.currentTime+d+0.01);
     g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.6);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.65)})}
 function bellBtn(){const b=$('bellbtn');if(!b)return;const ac=_ac;const needClick=BELL_ON&&(!BELL_READY||!ac||ac.state!=='running');
-  b.textContent=!BELL_ON?'\uD83D\uDD15 Gold bell OFF':(needClick?'\uD83D\uDD14 Click to allow the gold bell':'\uD83D\uDD14 Gold bell ON');
+  b.textContent=!BELL_ON?'\uD83D\uDD15 Bells OFF':(needClick?'\uD83D\uDD14 Click to allow the bells':'\uD83D\uDD14 Bells ON: gold chime + push beeps');
   b.style.background=!BELL_ON?'#262b35':(needClick?'#5a4300':'#1d4d2b');b.style.color=!BELL_ON?'#8a93a3':'#fff'}
 function bellToggle(){const ac=_actx();if(ac&&ac.state==='suspended')ac.resume().then(bellBtn);
   if(BELL_ON&&!BELL_READY){BELL_READY=true;bellSound();bellBtn();return}     // first click = allow sound + a test ring, NOT off
@@ -463,9 +466,19 @@ async function load100k(){
   if(false&&fresh.length){b.style.display='block';b.innerHTML=fresh.slice().reverse().map(o=>'&#128308; 100K HERE: '+o.sym+'  '+o.minute
      +'  '+big(o.vol)+' sh  close '+o.close+' on top of box '+o.box1_lo+'-'+o.box1_hi).join('<br>')}
   else{b.style.display='none'}
+  const lit=new Set();
   document.querySelectorAll('tr,.arow').forEach(r=>{const s=r.dataset&&r.dataset.s?r.dataset.s:(r.querySelector&&r.querySelector('td:nth-child(3)')?r.querySelector('td:nth-child(3)').textContent.trim().split(' ')[0]:'');
-    r.classList.toggle('k100row',!!(s&&K100[s]))});
+    r.classList.toggle('k100row',!!(s&&K100[s]));if(s&&K100[s])lit.add('P|'+s+'|'+K100[s].at)});
+  // 11-17 his ask: the CONSOLIDATION PUSH bell -- two low beeps, once per NEW push, only when its red row is on screen
+  if(PUSH_SEEN===null){PUSH_SEEN=lit;return}
+  let newPush=false;lit.forEach(k=>{if(!PUSH_SEEN.has(k)){newPush=true;PUSH_SEEN.add(k)}});
+  if(newPush&&BELL_ON)pushSound();
 }
+let PUSH_SEEN=null;
+function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
+  [0,0.3].forEach(d=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=330;
+    g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.45,ac.currentTime+d+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.25);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.28)})}
 // UNDER THE LINES (2026-11-14) -- reads :8792, hides any name already in the HOT 2 rows above
 function lnTag(name,line,px){if(!line)return '<span class="dim">'+name+' ?</span>';
   return px<line?'<span class="lnU">UNDER '+name+' '+(+line).toPrecision(4)+'</span>':'<span class="lnA">ABOVE '+name+' '+(+line).toPrecision(4)+'</span>'}
