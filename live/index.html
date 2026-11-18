@@ -177,6 +177,7 @@ window.fetch=async function(u,o){const s=(typeof u==='string')?u:(u&&u.url)||Str
   if(u.indexOf('/api/hot')>=0) return _resp(DATA.hot);
   if(u.indexOf('/vol1m')>=0) return _resp(DATA.vol||{});
   if(u.indexOf('/pmh_gold')>=0) return _resp(DATA.gold||{gold:[]});
+  if(u.indexOf('/bells')>=0) return DATA.bells?_resp(DATA.bells):new Response('{}',{status:503});
   if(u.indexOf(':8799/state')>=0) return _resp(DATA.k100||{flash:[]});
   if(u.indexOf(':8792/state')>=0) return DATA.under?_resp(DATA.under):new Response('{}',{status:503});
   if(u.indexOf('/api/add')>=0) return _resp({});
@@ -269,16 +270,7 @@ function bellToggle(){const ac=_actx();if(ac&&ac.state==='suspended')ac.resume()
   BELL_READY=true;BELL_ON=!BELL_ON;try{localStorage.setItem('h2_bell',BELL_ON?'1':'0')}catch(e){};if(BELL_ON)bellSound();bellBtn()}
 document.addEventListener('click',e=>{if(e.target&&e.target.id==='bellbtn')return;const ac=_actx();if(!ac)return;
   BELL_READY=true;if(ac.state==='suspended')ac.resume().then(bellBtn);else bellBtn()},true);
-function bellCheck(){const now=new Set();
-  Object.values(GOLDSET).forEach(o=>now.add('B|'+o.sym+'|'+o.since));
-  document.querySelectorAll('.arow.first1gold[data-s]').forEach(r=>now.add('F|'+r.dataset.s));
-  if(BELL_SEEN===null){BELL_SEEN=now;bellBtn();              // first look after the page opens: no ring for old gold
-    now.forEach(k=>{const p=k.split('|');const r=document.querySelector('.arow[data-s="'+p[1]+'"]');   // ...but show it on the bar (11-18)
-      ringAdd(p[1],'gold',p[0]==='B'?(GLINE+' break + 100k'):'1st alert + 100k',p[0]==='B'?((p[2]||'')+''):((r&&r.dataset.at)||hmsNow()))});
-    return}
-  let fresh=false;now.forEach(k=>{if(!BELL_SEEN.has(k)){fresh=true;BELL_SEEN.add(k);
-    const p=k.split('|');ringAdd(p[1],'gold',p[0]==='B'?(GLINE+' break + 100k'):'1st alert + 100k')}});
-  if(fresh&&BELL_ON)bellSound();bellBtn()}
+function bellCheck(){bellBtn()}   // 11-18: what rang now comes from the SERVER (/bells), see loadBells()
 let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
 function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
   if(etMin()<570||!x||!L||!x.px){PMHG[s]=false;return}
@@ -499,9 +491,7 @@ async function load100k(){
     r.classList.toggle('k100row',!!(s&&K100[s]));if(s&&K100[s])lit.add('P|'+s+'|'+K100[s].at)});
   // 11-17 his ask: the CONSOLIDATION PUSH bell -- two low beeps, once per NEW push, only when its red row is on screen
   if(PUSH_SEEN===null){PUSH_SEEN=lit;return}
-  let newPush=false;lit.forEach(k=>{if(!PUSH_SEEN.has(k)){newPush=true;PUSH_SEEN.add(k);
-    const p=k.split('|'),o=K100[p[1]]||{};ringAdd(p[1],'push','consolidation push'+(o.close?' close '+o.close:''))}});
-  if(newPush&&BELL_ON)pushSound();
+  // 11-18: the push bell now comes from the SERVER (/bells), see loadBells()
 }
 let PUSH_SEEN=null;
 function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
@@ -510,14 +500,16 @@ function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac
     g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.25);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.28)})}
 // 11-18 his ask: "a bell on the ticker that's ringing" -- WHO rang, WHY, and WHEN. Bar on top + bell on the ticker's
 // card and board rows: shakes for 2 min, then a still bell with the time. Saved per day in this browser.
-const RING_MS=120000;let RANG=[];
-try{RANG=JSON.parse(localStorage.getItem('h2_rang_'+ETDAY)||'[]')}catch(e){}
-function hmsNow(){return new Date().toLocaleTimeString('en-US',{hour12:false,timeZone:'America/New_York'})}
-function ringAdd(sym,kind,why,oldAt){const x=VOL[sym]||{};
-  if(RANG.some(r=>r.sym===sym&&r.kind===kind&&(oldAt||Date.now()-r.t<300000)))return;   // same stock + same bell within 5 min (page reload) = not a new ring
-  // oldAt = it was already lit when this page opened: listed (not shaking, no sound) with its own time
-  RANG.unshift({sym:sym,kind:kind,why:why,at:oldAt||hmsNow(),t:oldAt?Date.now()-RING_MS-1:Date.now(),px:x.px||null,vol:vScore(sym)||null});
-  RANG=RANG.slice(0,30);try{localStorage.setItem('h2_rang_'+ETDAY,JSON.stringify(RANG))}catch(e){}
+const RING_MS=120000;let RANG=[],BSEEN=null;
+// 11-18: ONE shared bell list from the server, with each alert's own time -> his screen and every member see the same.
+// A sound plays only for a bell that is NEW since this page opened and less than 3 minutes old.
+async function loadBells(){let j;try{j=await (await fetch('/bells',{cache:'no-store'})).json()}catch(e){return}
+  if(!j||!Array.isArray(j.bells))return;
+  RANG=j.bells.map(o=>({sym:o.sym,kind:o.kind,why:o.why,at:o.at,t:o.ep*1000,px:o.px,vol:o.vol,key:o.key}));
+  const keys=new Set(RANG.map(r=>r.key));
+  if(BSEEN===null){BSEEN=keys;ringPaint();return}
+  let g=false,p=false;RANG.forEach(r=>{if(!BSEEN.has(r.key)){BSEEN.add(r.key);if(Date.now()-r.t<180000){if(r.kind==='push')p=true;else g=true}}});
+  if(BELL_ON){if(g)bellSound();else if(p)pushSound()}
   ringPaint()}
 function ringLast(s){for(const r of RANG)if(r.sym===s)return r;return null}
 function ringHtml(s){const r=ringLast(s);if(!r)return '';const live=Date.now()-r.t<RING_MS;
@@ -576,7 +568,7 @@ async function loadUnder(){
     +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)
     +'<span class="arght dim">broke out of box '+(+r.bot).toPrecision(4)+'-'+(+r.top).toPrecision(4)+' (1m + 5m)</span></div></div>').join('');
 }
-all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);ringPaint();setInterval(ringPaint,1500);
+all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);ringPaint();setInterval(ringPaint,1500);loadBells();setInterval(loadBells,3000);
 </script><style>
 #gate{position:fixed;inset:0;background:#0f1115;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#171a21;border:1px solid #262b35;border-radius:12px;padding:24px}
@@ -638,7 +630,7 @@ async function start(session){
   setInterval(pull,15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795015189';
+const H2_BUILD='1795015572';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
