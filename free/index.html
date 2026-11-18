@@ -1,0 +1,521 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>HOT 2 SCANNER - free view (15 min delayed)</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262b35;--fg:#e6e9ef;--dim:#8a93a3;
+--up:#2ecc71;--dn:#ff5c5c;--near:#1a2533;--acc:#7cc4f5;--hot:#ff9f43}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.4 -apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:14px}
+h1{font-size:17px;margin:0 0 2px}
+h2{font-size:14px;margin:22px 0 6px;letter-spacing:.4px}
+.sub{color:var(--dim);font-size:12px;margin-bottom:10px}
+.info{color:var(--dim);font-size:12px;margin:0 0 8px}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:1040px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{position:sticky;top:0;background:var(--panel);color:var(--dim);font-weight:600;font-size:12px}
+td.l,th.l{text-align:left}
+tr.brk td{background:#2a1f10}
+tr.wake td{background:#102a1f}
+.sym{font-weight:700;font-size:15px}
+.up{color:var(--up)}.dn{color:var(--dn)}.dim{color:var(--dim)}.yl{color:var(--acc)}.ht{color:var(--hot)}
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700}
+.pn{background:#4a2a05;color:var(--hot)}
+.pi{background:#13283a;color:var(--acc)}
+.pu{background:#123524;color:var(--up)}
+.pm{background:#2b3240;color:var(--dim)}
+button{background:#2b3240;color:var(--fg);border:1px solid var(--line);padding:4px 9px;
+border-radius:6px;cursor:pointer;font-size:12px}button:hover{background:#353d4d}
+/* the alert log, same amber look as the board */
+.alertbox{border:1px solid var(--line);border-radius:8px;background:#12141a;padding:10px 12px;
+font-size:13px;line-height:1.6}
+.alertbox .at{color:var(--hot);font-weight:700;margin-right:8px}
+.alertbox .tx{color:#f5c542}
+/* the enriched alert row, 2026-10-19. His asks: flash a fresh face with volume, show the
+   tier, show how many times it has been on the board, 1m/5m/15m dots off the FORMING candle,
+   a WHITE triangle on the Pattern A red candle and a GREEN triangle when a coil is live. */
+.arow{border:1px solid var(--line);border-radius:7px;background:#15181f;padding:6px 8px 5px;
+ margin-bottom:4px;white-space:normal}
+.arow.pinned{border-left:3px solid var(--hot)}
+/* STAYS HIGHLIGHTED until the name alerts a second time -- his call 2026-10-19,
+   "i dont need to pulse but stay highlighed". No animation: a steady amber row. */
+.arow.flash{background:#3a2a06;border-color:var(--hot)}
+/* BIG FLASH, his call 2026-11-11: FIRST alert of the day + rank 1-5 + 100k+ shares in the
+   1-min candle at the alert. On 11-11 that was 6 of 6 runners (AUUD UCL SMTK CENN GIPR MTEK).
+   Latched for the day once it fires. Watch for the dip, do not chase the flash. */
+.arow.big100{background:#4a0d3a;border:2px solid #ff3df0;box-shadow:0 0 14px #ff3df0}
+.abig{color:#fff;background:#ff3df0;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
+.arow.big100 .abig{display:inline}
+/* 11-16 HIS RULES: PURPLE = a 100k 1-min candle RIGHT NOW (first breakout, or again later) - off when it cools.
+   GOLD = the ONE alerted stock with the biggest 1-min candle right now (100k+). Gold wins over purple. */
+.arow.goldrow{background:#3d3100;border:2px solid #ffd000;box-shadow:0 0 18px #ffd000}
+.agold{color:#111;background:#ffd000;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
+.arow.goldrow .agold{display:inline}
+/* 11-17 his ask: FIRST appearance on HOT 2 (x1) AND 100k+ in the 1-min candle right now = BLINKING GOLD.
+   Wins over purple and over the steady gold "most volume" row. Off when the 100k cools or the name alerts again (x2). */
+@keyframes g1blink{0%,100%{background:#5a4300;box-shadow:0 0 22px #ffd000}50%{background:#2a2000;box-shadow:0 0 4px #ffd000}}
+.arow.first1gold{border:3px solid #ffd000!important;animation:g1blink 1s ease-in-out infinite}
+.afirst{color:#111;background:#ffd000;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
+.arow.first1gold .afirst{display:inline}.arow.first1gold .abig{display:none}
+/* 11-17 his ask: from 9:30, EVERY break above TODAY'S premarket high with 100k+ = the same blinking gold. Re-arms when it
+   drops back under the PM high (0.5% under), so a failed break + retest that goes again lights gold again. */
+.arow.pmhgold{border:3px solid #ffd000!important;animation:g1blink 1s ease-in-out infinite}
+.apmh{color:#111;background:#ffd000;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px;display:none}
+/* 11-17 his ask: STEADY reminder (no blink) while a stock holds ABOVE today's premarket high, 9:30-4:00 */
+.arow.pmhabove{border-left:6px solid #ffd000!important}
+tr.pmhabove td:first-child{border-left:5px solid #ffd000!important}
+.pmA{background:#3d3100;color:#ffd000;border:1px solid #ffd000;font-weight:800;font-size:11px;padding:0 6px;border-radius:4px;white-space:nowrap}
+.pmU{background:#262b35;color:#c9d1d9;font-weight:700;font-size:11px;padding:0 6px;border-radius:4px;white-space:nowrap}
+.pmT{color:#ffd000;font-weight:800;font-size:11px;margin-left:4px}
+.apmhx:empty{display:none}
+.arow.pmhgold .apmh{display:inline}.arow.pmhgold .abig{display:none}.arow.pmhgold .afirst{display:none}
+.alast{font-size:11px;color:#9aa4b2;border:1px dashed #555;border-radius:4px;padding:0 6px}
+.alast:empty{display:none}
+tr.ptr td{box-shadow:inset 0 0 0 9999px rgba(255,61,240,.16)} tr.ptr td:first-child{border-left:3px solid #ff3df0}
+tr.goldtr td{box-shadow:inset 0 0 0 9999px rgba(255,208,0,.22)!important} tr.goldtr td:first-child{border-left:4px solid #ffd000}
+.aline{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.awhy{color:#f5c542;font-size:11.5px;line-height:1.45;margin-top:2px;white-space:normal}
+.adot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.adot.g{background:var(--up)}.adot.r{background:var(--dn)}.adot.x{background:#39414f}
+.arght{margin-left:auto;white-space:nowrap}
+.awa{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.9)}
+.aco{color:var(--up);text-shadow:0 0 8px rgba(34,224,122,.85)}
+.acnt{color:var(--acc);font-weight:700;font-size:12px}
+.afr{color:var(--hot);font-weight:700;font-size:11px;letter-spacing:.4px}
+.empty{color:var(--dim);padding:6px 2px}
+.err{background:#3a2a10;border:1px solid #6b4d12;color:#f5c542;padding:8px 10px;
+border-radius:6px;margin-bottom:10px;display:none}
+/* 1-min volume, 2026-10-22: one cell / chip per row, and the page-wide leader lit gold */
+.v1{font-weight:700}
+.v1chip{font-weight:700;font-size:12px;padding:0 6px;border:1px solid var(--line);border-radius:6px}
+.vtop{background:#ffd84d!important;color:#111!important;border-radius:4px}
+.vtop .up,.vtop .dn{color:#111!important}
+tr.vtoprow td{box-shadow:inset 0 0 0 9999px rgba(255,216,77,.10)}
+.arow.vtoprow{border-color:#ffd84d}
+.volbar{font-weight:700;color:#ffd84d;font-size:15px;margin:2px 0 8px;min-height:20px}
+/* 100K HERE, his call 2026-11-13 (VNRX 8:46): from the BOX BOOM bot (:8799) -- a 100k+ 1-min candle closing ON TOP of
+   its 1-min box with the 1-min and 5-min boxes together. Red banner + red row for 15 minutes. Alert only. */
+.k100{display:none;background:#5a0b0b;border:2px solid #ff3030;box-shadow:0 0 14px #ff3030;color:#fff;font-weight:800;
+ font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px}
+tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
+.arow.k100row{border:2px solid #ff3030!important;box-shadow:0 0 12px #ff3030}
+
+/* UNDER THE LINES, his OK 2026-11-14: names NOT on HOT 2 yet doing 100k+/min that just broke out of the 1m AND 5m box.
+   Own box, own color (cyan), from box_alert/under_lines/under_lines.py on :8792. It never takes a HOT 2 row's place. */
+.ulbox{border:1px solid #1fb5c9;border-radius:8px;background:#0d1d22;padding:10px 12px;font-size:13px}
+.ulrow{border:1px solid #1f4a52;border-left:4px solid #1fd3ea;border-radius:7px;background:#102a30;padding:6px 8px 5px;margin-bottom:4px}
+.ulrow .sym{color:#5fe8ff}
+.ulat{color:#1fd3ea;font-weight:700;margin-right:6px}
+.lnU{background:#3a1420;color:#ff8fa8;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px}
+.lnA{background:#123524;color:#2ecc71;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px}
+</style></head><body>
+<h1 style="font-size:22px;letter-spacing:1px">HOT 2 <span style="color:#ff3df0">SCANNER</span> <span style="font-size:13px;color:#f5c542;border:1px solid #f5c542;border-radius:5px;padding:1px 7px;vertical-align:middle">FREE VIEW &middot; 15 MIN DELAYED</span></h1>
+<div class="sub" id="hdr">loading...</div>
+<div class="volbar" id="volnote"></div>
+<div class="k100" id="k100"></div>
+<div id="goldbar" style="display:none;border:3px solid #ffd000;color:#fff;font-weight:800;font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px;animation:g1blink 1s ease-in-out infinite"></div>
+<div class="err" id="err"></div><div class="lockcard"><div class="lk">&#128274;</div><div><b>Gold breaks + 100K HERE</b> is members-only.<br><span>Blinking gold when a stock breaks the premarket high (after 4 PM: the day high) on 100k, and the 100K HERE flash. Live members only.</span></div><a class="unl" href="../#pricing">Unlock live</a></div>
+
+<h2 class="ht">&#9889; BREAKING NOW <span class="dim" id="h2sub"></span></h2>
+<div class="wrap"><table id="t_brk"><thead><tr>
+<th class="l">#</th><th class="l">float</th><th class="l">ticker</th><th class="l">what</th><th>1-min vol</th><th>last</th><th>day</th>
+<th>vs break</th><th>vol</th><th>% float</th><th>shares</th><th class="l">why</th>
+<th></th></tr></thead><tbody></tbody></table></div>
+
+<h2 style="color:#f5c542">&#128276; HOT 2 ALERTS <span class="dim" id="alsub"></span></h2>
+<div class="alertbox" id="alerts"><div class="empty">loading...</div></div>
+
+<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">members only<span id="ulsub" style="display:none"></span></span></h2>
+<div class="lockcard"><div class="lk">&#128274;</div><div><b>UNDER THE LINES</b> is members-only.<br><span>The early heads-up: stocks breaking out on 100k+ volume while still under YHOD and PMHOD, often minutes before HOT 2.</span></div><a class="unl" href="../#pricing">Unlock live</a></div><div class="ulbox" id="under" style="display:none"><div class="empty">loading...</div></div>
+
+<h2 class="yl">&#128293; HOT NOW <span class="dim" id="hnsub"></span></h2>
+<div class="wrap"><table id="t_hot"><thead><tr>
+<th class="l">#</th><th class="l">float</th><th class="l">ticker</th><th class="l">status</th><th>1-min vol</th><th>price</th>
+<th>day %</th><th>5-min %</th><th>5-min $</th><th>vol pace</th><th>day volume</th>
+<th>leg began</th><th>from HOD</th><th>vs YHOD</th><th></th>
+</tr></thead><tbody></tbody></table></div>
+
+<script>
+let DATA=null, LAST_AT=null;
+const SB='https://bbfjmqvklilpqkxwlzib.supabase.co', KEY='sb_publishable_b1GOHTUJgD6xgfVYT0nSeQ_0tySTlos';
+const _resp=o=>new Response(JSON.stringify(o===undefined||o===null?{}:o),{status:o?200:503,headers:{'Content-Type':'application/json'}});
+const _realFetch=window.fetch.bind(window);
+window.fetch=async function(u,o){const s=(typeof u==='string')?u:(u&&u.url)||String(u);
+  if(/^https?:/i.test(s)&&s.indexOf('127.0.0.1')<0) return _realFetch(u,o);
+  u=s;
+  if(!DATA) return _resp(null);
+  if(u.indexOf('/api/hot2_alerts')>=0) return _resp(DATA.alerts||{alerts:[]});
+  if(u.indexOf(':8783/api/rows')>=0) return DATA.rows?_resp(DATA.rows):new Response('{}',{status:503});
+  if(u.indexOf('/api/hot2')>=0) return _resp(DATA.hot2);
+  if(u.indexOf('/api/hot')>=0) return _resp(DATA.hot);
+  if(u.indexOf('/vol1m')>=0) return _resp(DATA.vol||{});
+  if(u.indexOf('/pmh_gold')>=0) return _resp({gold:[],pmh:{}});        // members only
+  if(u.indexOf(':8799/state')>=0) return _resp({flash:[]});            // members only
+  if(u.indexOf(':8792/state')>=0) return new Response('{}',{status:503});  // members only
+  return new Response('{}',{status:404});
+};
+</script>
+<script>
+const TOPN=5;
+const $=i=>document.getElementById(i);
+const J=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(u+' '+r.status);return r.json()};
+function num(x,d){if(x===null||x===undefined||x==='')return '-';
+  return Number(x).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d})}
+function pct(x,d){if(x===null||x===undefined)return '<span class="dim">-</span>';
+  const v=Number(x);const c=v>0?'up':(v<0?'dn':'dim');
+  return '<span class="'+c+'">'+(v>0?'+':'')+num(v,d===undefined?2:d)+'%</span>'}
+function big(x){if(x===null||x===undefined)return '-';const v=Number(x);
+  if(v>=1e9)return num(v/1e9,1)+'B'; if(v>=1e6)return num(v/1e6,1)+'M';
+  if(v>=1e3)return num(v/1e3,0)+'k'; return num(v,0)}
+function dol(x){if(x===null||x===undefined)return '-';return '$'+big(x)}
+function addBtn(s){return '';return '<button onclick="addSym(\''+s+'\')">+ list</button>'}
+async function addSym(s){try{await fetch('/api/add',{method:'POST',body:s});
+  $('hdr').textContent=s+' added to My list';}catch(e){}}
+function blockPill(b){const t=(b||'').toUpperCase();
+  if(t.indexOf('BREAK')>=0)return '<span class="pill pn">'+t+'</span>';
+  if(t.indexOf('PLAY')>=0)return '<span class="pill pi">'+t+'</span>';
+  return '<span class="pill pm">'+(t||'-')+'</span>'}
+// 1-MIN VOLUME (2026-10-22). VOL holds the last answer from /vol1m so a re-render paints the
+// numbers straight away instead of flashing '-' every 3 seconds.
+let VOL={};
+// BIG FLASH latch (2026-11-11). BIG[sym]=true once a FIRST-of-day, rank 1-5 alert shows 100k+
+// shares in the current 1-min candle within 2 minutes of the alert. Kept for the day.
+const ETDAY=new Date().toLocaleDateString('en-CA',{timeZone:'America/New_York'});
+let BIG={};try{BIG=JSON.parse(localStorage.getItem('big100_'+ETDAY)||'{}')}catch(e){BIG={}}
+function etMin(){const t=new Date().toLocaleTimeString('en-GB',{timeZone:'America/New_York',hour12:false}).split(':');
+  return (+t[0])*60+(+t[1])+(+t[2])/60}
+// 11-16: FIRST100 = this stock's first-of-day top-5 alert printed 100k within 2 min (its 1st breakout); COOLED = it went under
+// 100k since; LAST100 = the last candle time it printed 100k+. Saved per day in the browser.
+let FIRST100={},COOLED={},LAST100={},GOLD=null;
+try{FIRST100=JSON.parse(localStorage.getItem('first100_'+ETDAY)||'{}');COOLED=JSON.parse(localStorage.getItem('cooled100_'+ETDAY)||'{}');
+    LAST100=JSON.parse(localStorage.getItem('last100_'+ETDAY)||'{}')}catch(e){}
+function save100(){try{localStorage.setItem('first100_'+ETDAY,JSON.stringify(FIRST100));localStorage.setItem('cooled100_'+ETDAY,JSON.stringify(COOLED));
+    localStorage.setItem('last100_'+ETDAY,JSON.stringify(LAST100))}catch(e){}}
+function vScore(s){const x=VOL[s];if(!x)return 0;return Math.max(x.v||0,x.pv||0)}
+// 11-16 no blinking: a fresh minute starts near 0 shares, so judge on the current candle OR the one before
+function isHot(s){return vScore(s)>=100000}
+function hotLabel(s){return (FIRST100[s]&&!COOLED[s])?'1ST 100K BREAKOUT':(FIRST100[s]?'100K AGAIN':'100K NOW')}
+function lastTag(s){return (!isHot(s)&&LAST100[s])?('last 100k '+LAST100[s]):''}
+// 11-17 PM-HIGH GOLD state per stock: ARM = it is (or was last seen) under today's PM high, so the next break counts.
+// Above + 100k + armed -> gold. Gold stays while above and 100k. Above but cooled -> off and NOT re-armed until it
+// goes back under (price < PM high - 0.5%). Then a new break with 100k lights gold again.
+// 11-17: the gold state now comes from the SERVER (/pmh_gold) for every stock, so a stale tab or a row that scrolled off can't miss it
+let GOLDSET={},PMHMAP={},GLINE='PM HIGH';   // 11-17: after 4:00 PM the line is today's DAY HIGH (9:30-4:00)
+function pmhChip(s){const x=PMHMAP[s];if(!x)return '';const L=x[0],pct=x[2];
+  const lv=(+L).toPrecision(4);
+  return x[3]?'<span class="pmA">ABOVE '+GLINE+' '+lv+' &middot; '+(pct>=0?'+':'')+pct.toFixed(1)+'% &middot; since '+x[3]+'</span>'
+             :'<span class="pmU">UNDER '+GLINE+' '+lv+' &middot; '+pct.toFixed(1)+'%</span>'}
+function applyPmh(){
+  document.querySelectorAll('.apmh').forEach(e=>e.textContent=GLINE+' BREAK + 100K');
+  document.querySelectorAll('.arow[data-s]').forEach(r=>{const s=r.dataset.s,x=PMHMAP[s];
+    r.classList.toggle('pmhabove',!!(x&&x[3]));const c=r.querySelector('.apmhx');if(c)c.innerHTML=pmhChip(s)});
+  document.querySelectorAll('td.v1[data-vsym]').forEach(td=>{const tr=td.closest('tr');if(!tr)return;const s=td.dataset.vsym,x=PMHMAP[s];
+    tr.classList.toggle('pmhabove',!!(x&&x[3]));const sc=tr.querySelector('td.sym');if(!sc)return;
+    let t=sc.querySelector('.pmT');if(x&&x[3]){if(!t){t=document.createElement('span');t.className='pmT';sc.appendChild(t)}t.textContent=GLINE=='DAY HIGH'?'\u25B2HOD':'\u25B2PMH'}else if(t)t.remove()});}
+async function loadGold(){let j;
+  const syms=[...new Set([...document.querySelectorAll('[data-s],[data-vsym]')].map(e=>e.dataset.s||e.dataset.vsym))].filter(Boolean);
+  try{j=await (await fetch('/pmh_gold?syms='+encodeURIComponent(syms.join(',')),{cache:'no-store'})).json()}catch(e){return}
+  GLINE=j.line||'PM HIGH';PMHMAP=j.pmh||{};applyPmh();
+  const g=j.gold||[];GOLDSET={};g.forEach(o=>GOLDSET[o.sym]=o);
+  const b=$('goldbar');
+  if(g.length){b.style.display='block';b.innerHTML=g.map(o=>'&#11088; '+GLINE+' BREAK + 100K: <b>'+o.sym+'</b> '+(+o.px).toPrecision(4)
+     +' &nbsp;broke '+(GLINE=='DAY HIGH'?"today's high (9:30-4:00) ":'the premarket high ')+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
+  else b.style.display='none';
+  document.querySelectorAll('.arow[data-s]').forEach(r=>r.classList.toggle('pmhgold',!!GOLDSET[r.dataset.s]));}
+let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
+function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
+  if(etMin()<570||!x||!L||!x.px){PMHG[s]=false;return}
+  if(x.px<L*0.995){PMHARM[s]=true;PMHG[s]=false;return}
+  if(x.px<=L){PMHG[s]=false;return}                          // within 0.5% under the line: no change to the arm
+  if(isHot(s)&&(PMHG[s]||PMHARM[s]!==false)){PMHG[s]=true;PMHARM[s]=false;return}
+  PMHG[s]=false;PMHARM[s]=false}
+function checkBig(best,bv){
+  const now=etMin(); let ch=false;
+  document.querySelectorAll('.arow').forEach(r=>{
+    const s=r.dataset.s;if(!s)return;
+    const hot=isHot(s), x=VOL[s];
+    const at=(r.dataset.at||'').split(':');
+    const age=at.length>=2?now-((+at[0])*60+(+at[1])+(+(at[2]||0))/60):99;
+    if(hot&&r.dataset.first5==='1'&&!FIRST100[s]&&age>=0&&age<=2){FIRST100[s]=r.dataset.at;ch=true}
+    if(hot){const m=(x&&x.m)||'';if(LAST100[s]!==m){LAST100[s]=m;ch=true}}
+    if(!hot&&FIRST100[s]&&!COOLED[s]){COOLED[s]=true;ch=true}
+    r.classList.toggle('big100',hot);
+    r.classList.toggle('first1gold',hot&&r.dataset.n==='1');
+    r.classList.toggle('pmhgold',!!GOLDSET[s]);
+    r.classList.toggle('goldrow',!!best&&s===best&&bv>=100000);
+    const lb=r.querySelector('.abig');if(lb)lb.textContent=hotLabel(s);
+    const lt=r.querySelector('.alast');if(lt)lt.textContent=lastTag(s);
+  });
+  // the BREAKING NOW / HOT NOW boards too (11-16: AKAN 180k sat on the board unlit)
+  document.querySelectorAll('td.v1[data-vsym]').forEach(td=>{const tr=td.closest('tr');if(!tr)return;const s=td.dataset.vsym;
+    tr.classList.toggle('ptr',isHot(s));tr.classList.toggle('goldtr',!!best&&s===best&&bv>=100000)});
+  if(ch)save100();
+}
+function volHtml(s){const x=VOL[s];
+  if(!x||x.v===null||x.v===undefined)return '<span class="dim">-</span>';
+  if(x.est)return '~'+big(x.v);   // live-quote rate, no finished candle for this name
+  const up=(x.pv===null||x.pv===undefined)||x.v>=x.pv;
+  return big(x.v)+' <span class="'+(up?'up':'dn')+'">'+(up?'&#9650;':'&#9660;')+'</span>'}
+function volTd(s){return '<td class="v1" data-vsym="'+s+'">'+volHtml(s)+'</td>'}
+async function fillVol(){
+  const els=[...document.querySelectorAll('[data-vsym]')];
+  const syms=[...new Set(els.map(e=>e.dataset.vsym))];
+  if(!syms.length){$('volnote').textContent='';return}
+  try{const r=await fetch('/vol1m?syms='+encodeURIComponent(syms.join(',')),{cache:'no-store'});
+    if(r.ok)VOL=await r.json();}catch(e){}
+  let best=null,bv=0;
+  syms.forEach(s=>{const x=VOL[s];if(x&&x.v!==null&&x.v>bv){bv=x.v;best=s}});
+  document.querySelectorAll('.vtoprow').forEach(r=>r.classList.remove('vtoprow'));
+  els.forEach(e=>{const s=e.dataset.vsym,x=VOL[s];
+    e.innerHTML=volHtml(s);
+    e.title=x&&x.v!==null?(x.est?('~'+num(x.v,0)+' shares/minute from the live quotes ('+x.m
+        +') -- no 1-minute candle is recorded for '+s)
+      :(x.m+' candle: '+num(x.v,0)+' shares'+(x.pv!==null&&x.pv!==undefined?'  (minute before: '+num(x.pv,0)+')':'')))
+      :'no current 1-minute volume for '+s+' (not recorded and not in the live quotes)';
+    const top=(s===best&&bv>0);e.classList.toggle('vtop',top);
+    if(top){const r=e.closest('tr')||e.closest('.arow');if(r)r.classList.add('vtoprow')}});
+  // 11-16 sticky gold: same scoring as purple (current or previous minute); switch only when another stock is 20% bigger
+  let gb=null,gv=0;syms.forEach(s=>{const v=vScore(s);if(v>gv){gv=v;gb=s}});
+  if(GOLD&&syms.includes(GOLD)&&vScore(GOLD)>=100000&&gb!==GOLD&&gv<vScore(GOLD)*1.2){gb=GOLD;gv=vScore(GOLD)}
+  GOLD=null;   // 11-16 his call: 'get rid of the gold, I like what it had already for highest volume' (yellow volume cell + MOST VOLUME banner)
+  checkBig(GOLD,gv);
+  $('volnote').innerHTML=best?('&#128266; MOST VOLUME (15 min ago): '+best+'  '+(VOL[best].est?'~':'')+num(bv,0)
+    +(VOL[best].est?' shares/min (live quotes)':' shares in the '+VOL[best].m+' candle')):'';
+}
+// FLOAT FIRST, his call 2026-11-06 "since float is important cant you move the float before the name".
+// Same number as before, now left of the ticker and bold: under 20M bright, 20M+ dim.
+function fltTd(f){if(f===null||f===undefined||f==='')return '<td class="l dim">-</td>';
+  return '<td class="l" style="font-weight:700;color:'+(Number(f)<20e6?'#e6e9ef':'#8a93a3')+'">'+big(f)+'</td>'}
+function tierPill(t){const u=(t||'').toUpperCase();
+  if(u.indexOf('WAKING')>=0)return '<span class="pill pu">'+u+'</span>';
+  if(u.indexOf('IN PLAY')>=0)return '<span class="pill pi">'+u+'</span>';
+  if(u.indexOf('MOVING')>=0)return '<span class="pill pn">'+u+'</span>';
+  return '<span class="pill pm">'+(u||'-')+'</span>'}
+
+// 1. BREAKING NOW -------------------------------------------------------------
+async function loadBrk(){
+  const j=await J('/api/hot2');
+  $('hdr').textContent='15 minutes delayed \u00b7 showing the screen as of '+((DATA&&DATA.as_of_et)||'')+' ET';
+  $('h2sub').textContent=' '+(j.breaking||0)+' breaking now, '+(j.matched||0)+' on the board'
+    +' \u00b7 top '+TOPN+' shown'
+    ;
+  const b=$('t_brk').tBodies[0];b.innerHTML='';
+  // TOP 5 ONLY, his call 2026-10-20: "i should only see 5 on my scanner so i dont have to
+  // scroll". The board still tracks everything and the subtitle still reports the real
+  // count -- the TABLE stops at TOPN so all three sections fit without scrolling.
+  const rows=(j.rows||[]).slice(0,TOPN);
+  if(!rows.length){b.innerHTML='<tr><td colspan="13" class="l dim">nothing on the board</td></tr>';return}
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    if((r.block||'').toUpperCase().indexOf('BREAK')>=0)tr.className='brk';
+    // the board writes &middot; into `why`; decode it and keep it as TEXT
+    const why=(r.why||'').replace(/&middot;/g,'\u00b7');
+    tr.innerHTML='<td class="l dim">'+(i+1)+'</td>'
+      +fltTd(r.float)
+      +'<td class="l sym">'+r.sym+'</td>'
+      +'<td class="l">'+blockPill(r.block)+'</td>'
+      +volTd(r.sym)
+      +'<td>'+num(r.last,r.last<1?4:2)+'</td>'
+      +'<td>'+pct(r.day_pct)+'</td>'
+      +'<td>'+pct(r.vs_break_pct)+'</td>'
+      +'<td class="dim">'+(r.sus_x===null||r.sus_x===undefined?'-':num(r.sus_x,1)+'x')+'</td>'
+      +'<td>'+pct(r.turn_pct)+'</td>'
+      +'<td class="dim">'+big(r.sh_since)+'</td>'
+      +'<td class="l dim" id="why'+i+'"></td>'
+      +'<td>'+addBtn(r.sym)+'</td>';
+    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');}
+    b.appendChild(tr);
+    const c=document.getElementById('why'+i); if(c)c.textContent=why;
+  });
+}
+// 2. THE ALERTS, BELOW THE BOARD ----------------------------------------------
+const PILL={'BREAKING NOW':'pn','IN PLAY':'pi','WAKING UP':'pu','MOVING':'pm'};
+let flashed={};
+async function loadAlerts(){
+  const box=$('alerts');
+  let rows=null;
+  try{
+    const e=await fetch('http://127.0.0.1:8783/api/rows',{cache:'no-store'});
+    if(e.ok){rows=(await e.json()).rows||[];}
+  }catch(err){rows=null;}
+  if(rows&&rows.length){
+    $('alsub').textContent=' newest first \u00b7 '+rows.length+' shown';
+    let h='';
+    rows.forEach(k=>{
+      {const mm=/broke premarket high ([\d.]+)/.exec(k.why||'');if(mm)PMHLV[k.sym]=+mm[1];}
+      const isNew = k.fresh;   // pulses the whole time it is a fresh face
+      let d='';
+      (k.dots||['x','x','x']).forEach(v=>{
+        d+='<span class="adot '+(v==='g'?'g':(v==='r'?'r':'x'))+'"></span>';
+      });
+      h+='<div class="arow'+(k.pinned?' pinned':'')+(isNew?' flash':'')+(isHot(k.sym)?' big100':'')+(GOLD&&k.sym===GOLD?' goldrow':'')+(isHot(k.sym)&&(k.n||1)<=1?' first1gold':'')+(GOLDSET[k.sym]?' pmhgold':'')+(PMHMAP[k.sym]&&PMHMAP[k.sym][3]?' pmhabove':'')
+        +'" data-n="'+(k.n||1)+'" data-s="'+k.sym+'" data-first5="'+((k.n||1)<=1&&k.rank&&k.rank<=5?1:0)+'" data-at="'+(k.at||'')+'">'
+        +'<div class="aline">'
+        +'<span class="at">'+(k.at||'')+'</span>'
+        +'<span class="sym yl">'+k.sym+'</span>'
+        +(k.rank?'<span class="dim">#'+k.rank+'</span>':'')
+        +(k.tier?'<span class="pill '+(PILL[k.tier]||'pm')+'">'+k.tier+'</span>':'')
+        +'<span class="acnt">x'+(k.n||1)+'</span>'
+        +(k.fresh?'<span class="afr">FRESH 1st</span>':'')
+        +'<span class="agold">MOST VOLUME NOW</span>'
+        +'<span class="afirst">1ST ALERT + 100K</span>'
+        +'<span class="apmh">PM HIGH BREAK + 100K</span>'
+        +'<span class="apmhx">'+pmhChip(k.sym)+'</span>'
+        +'<span class="abig">'+hotLabel(k.sym)+'</span>'
+        +'<span class="alast">'+lastTag(k.sym)+'</span>'
+        +'<span class="v1chip" data-vsym="'+k.sym+'">'+volHtml(k.sym)+'</span>'
+        +'<span class="arght">'+d
+        +'<span class="awa">'+(k.arrow?'&nbsp;&#9650;':'&nbsp;&nbsp;')+'</span>'
+        +'<span class="aco">'+(k.coil?'&nbsp;&#9650;':'&nbsp;&nbsp;')+'</span>'
+        +'</span></div>'
+        +'<div class="awhy">'+((k.why||'').replace(/&middot;/g,'\u00b7'))+'</div>'
+        +'</div>';
+    });
+    box.innerHTML=h;
+    return;
+  }
+  // FALLBACK: hot2_rows is not up, so render exactly what this page always did
+  const j=await J('/api/hot2_alerts?since=0');
+  const a=(j.alerts||[]).slice().sort((x,y)=>y.epoch-x.epoch);
+  $('alsub').textContent=' newest first \u00b7 '+a.length+' held \u00b7 plain (rows service down)';
+  if(!a.length){box.innerHTML='<div class="empty">no HOT 2 alerts yet</div>';return}
+  box.innerHTML='';
+  a.slice(0,120).forEach(x=>{
+    const d=document.createElement('div');
+    d.style.whiteSpace='nowrap';d.style.overflow='hidden';d.style.textOverflow='ellipsis';
+    const s=document.createElement('span');s.className='at';s.textContent=x.at||'';
+    const t=document.createElement('span');t.className='tx';
+    t.textContent=(x.text||'').replace(/&middot;/g,'\u00b7');
+    d.appendChild(s);d.appendChild(t);box.appendChild(d);
+  });
+}
+// 3. HOT NOW, WHERE STILL HOLDING USED TO BE ----------------------------------
+async function loadHot(){
+  const j=await J('/api/hot');
+  $('hnsub').textContent=' top '+TOPN+' of '+(j.matched||0);
+  const b=$('t_hot').tBodies[0];b.innerHTML='';
+  const rows=(j.rows||[]).slice(0,TOPN);
+  if(!rows.length){b.innerHTML='<tr><td colspan="15" class="l dim">nothing hot right now</td></tr>';return}
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    if((r.tier||'').toUpperCase().indexOf('WAKING')>=0)tr.className='wake';
+    tr.innerHTML='<td class="l dim">'+(i+1)+'</td>'
+      +fltTd(r.float)
+      +'<td class="l sym">'+r.sym+'</td>'
+      +'<td class="l">'+tierPill(r.tier)+(r.fresh?' <span class="pill pn">NEW</span>':'')+'</td>'
+      +volTd(r.sym)
+      +'<td>'+num(r.last,r.last<1?4:2)+'</td>'
+      +'<td>'+pct(r.day_pct)+'</td>'
+      +'<td>'+pct(r.mom5_pct)+'</td>'
+      +'<td class="dim">'+dol(r.dv5)+'</td>'
+      +'<td class="dim">'+(r.wake_x===null||r.wake_x===undefined?'-':num(r.wake_x,1)+'x')+'</td>'
+      +'<td class="dim">'+big(r.day_vol)+'</td>'
+      +'<td class="dim">'+(r.leg_began||'-')
+        +(r.leg_min_ago!==null&&r.leg_min_ago!==undefined?' <span class="dim">('+num(r.leg_min_ago,0)+'m)</span>':'')+'</td>'
+      +'<td>'+pct(r.from_hod_pct)+'</td>'
+      +'<td>'+pct(r.vs_yhod_pct)+'</td>'
+      +'<td>'+addBtn(r.sym)+'</td>';
+    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');}
+    b.appendChild(tr);
+  });
+}
+async function all(){
+  try{await Promise.all([loadBrk(),loadAlerts(),loadHot()]);$('err').style.display='none';
+    await fillVol();applyPmh()}
+  catch(e){$('err').style.display='block';
+    $('err').textContent='waiting for data... (the free view fills in 15 minutes after the 4:00 AM ET start)'}
+}
+let K100={};
+async function load100k(){
+  let f;try{f=await (await fetch('http://127.0.0.1:8799/state',{cache:'no-store'})).json()}catch(e){return}
+  const now=etMin(),fresh=[];K100={};
+  (f.flash||[]).forEach(o=>{const t=(o.at||'').split(':');if(t.length<2)return;
+    const age=now-((+t[0])*60+(+t[1])+(+(t[2]||0))/60);if(age>=0&&age<=15){K100[o.sym]=o;fresh.push(o)}});
+  const b=$('k100');
+  // 11-17 his call: the TOP of the screen is for the GOLD only -- 100K HERE just lights the stock's own row red
+  if(false&&fresh.length){b.style.display='block';b.innerHTML=fresh.slice().reverse().map(o=>'&#128308; 100K HERE: '+o.sym+'  '+o.minute
+     +'  '+big(o.vol)+' sh  close '+o.close+' on top of box '+o.box1_lo+'-'+o.box1_hi).join('<br>')}
+  else{b.style.display='none'}
+  document.querySelectorAll('tr,.arow').forEach(r=>{const s=r.dataset&&r.dataset.s?r.dataset.s:(r.querySelector&&r.querySelector('td:nth-child(3)')?r.querySelector('td:nth-child(3)').textContent.trim().split(' ')[0]:'');
+    r.classList.toggle('k100row',!!(s&&K100[s]))});
+}
+// UNDER THE LINES (2026-11-14) -- reads :8792, hides any name already in the HOT 2 rows above
+function lnTag(name,line,px){if(!line)return '<span class="dim">'+name+' ?</span>';
+  return px<line?'<span class="lnU">UNDER '+name+' '+(+line).toPrecision(4)+'</span>':'<span class="lnA">ABOVE '+name+' '+(+line).toPrecision(4)+'</span>'}
+async function loadUnder(){
+  const box=$('under');let f;
+  try{f=await (await fetch('http://127.0.0.1:8792/state',{cache:'no-store'})).json()}
+  catch(e){box.innerHTML='<div class="empty">UNDER THE LINES service is not running (:8792)</div>';$('ulsub').textContent='';return}
+  const rows=f.show||[];   // 11-17 his rule: max 5, only while UNDER YHOD and PMHOD (server drops them once above)
+  $('ulsub').textContent='watching '+(f.watching||0)+' heavy-volume names'+'';
+  if(!rows.length){box.innerHTML='<div class="empty">nothing right now</div>';return}
+  box.innerHTML=rows.map(r=>r.kind==='FRESH'?
+    // 11-17 FRESH 9:30+: first 100k green candle after the open, up 10%+, still under TODAY's premarket high
+    '<div class="ulrow" style="border-left-color:#7CFC00;background:#11291a"><div class="aline"><span class="ulat" style="color:#7CFC00">'+(r.at||'')+'</span>'
+    +'<span class="sym">'+r.sym+'</span><span style="background:#7CFC00;color:#111;font-weight:800;font-size:11px;padding:1px 6px;border-radius:4px">FRESH 9:30+</span>'
+    +'<span>'+(+r.px).toPrecision(4)+'</span>'+(r.now?'<span class="dim">now '+(+r.now).toPrecision(4)+'</span>':'')
+    +(r.vnow?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vnow)+'/min</span>':'')
+    +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">on HOT 2 '+r.hot2+'</span>':'')
+    +'<span class="v1chip" title="shares in the trigger candle">'+big(r.vol)+' in '+(r.candle||'')+'</span>'
+    +lnTag('PM HIGH',r.pmh,r.now||r.px)
+    +'<span class="arght dim">'+(((r.pmh/(r.now||r.px))-1)*100).toFixed(1)+'% to the PM high</span></div></div>'
+   :'<div class="ulrow"><div class="aline"><span class="ulat">'+(r.at||'')+'</span>'
+    +'<span class="sym">'+r.sym+'</span><span>'+(+r.px).toPrecision(4)+'</span>'
+    +(r.now?'<span class="dim">now '+(+r.now).toPrecision(4)+'</span>':'')
+    +(r.vnow?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vnow)+'/min</span>':'')
+    +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">&rarr; HOT 2 '+r.hot2+'</span>':'')
+    +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)+lnTag('PMHOD',r.pmhod,r.now||r.px)
+    +'<span class="arght dim">broke out of box '+(+r.bot).toPrecision(4)+'-'+(+r.top).toPrecision(4)+' (1m + 5m)</span></div></div>').join('');
+}
+all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);
+</script><style>
+#gate{position:fixed;inset:0;background:rgba(15,17,21,.97);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+#gate .box{max-width:440px;width:100%;background:#171a21;border:1px solid #262b35;border-radius:12px;padding:24px}
+#gate h1{font-size:24px;margin:0 0 6px}#gate p{color:#8a93a3;margin:6px 0 14px}
+#gate input[type=email]{width:100%;padding:11px;border-radius:8px;border:1px solid #262b35;background:#0f1115;color:#e6e9ef;font-size:15px;box-sizing:border-box}
+#gate .go{margin-top:12px;width:100%;padding:12px;border:0;border-radius:8px;background:#ff3df0;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+#gate .msg{margin-top:10px;color:#f5c542;font-size:13px;min-height:18px}
+#gate label{display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13px;color:#c9d1d9;cursor:pointer}
+#gate label input{width:17px;height:17px;margin:1px 0 0;flex:none}
+#fbar{position:sticky;top:0;z-index:40;background:#2a2108;border:1px solid #f5c542;color:#ffe9a6;border-radius:8px;padding:8px 12px;margin:0 0 10px;font-size:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#fbar b{color:#fff}#fbar a{margin-left:auto}
+.unl{background:#ff3df0;color:#fff!important;text-decoration:none;font-weight:800;padding:7px 14px;border-radius:8px;white-space:nowrap;font-size:14px}
+.lockcard{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:repeating-linear-gradient(135deg,#151922,#151922 10px,#12161e 10px,#12161e 20px);border:1px dashed #3a4252;border-radius:10px;padding:12px 14px;margin:6px 0 12px;color:#c9d1d9;font-size:14px}
+.lockcard .lk{font-size:22px}.lockcard span{color:#8a93a3;font-size:13px}.lockcard .unl{margin-left:auto}
+</style>
+<div id="gate"><div class="box">
+ <h1>HOT 2 <span style="color:#ff3df0">SCANNER</span></h1>
+ <p>See the real scanner free, <b style="color:#f5c542">15 minutes delayed</b>. Enter your email to open it.</p>
+ <input id="em" type="email" placeholder="you@example.com" autocomplete="email">
+ <label><input id="ok" type="checkbox" checked> Email me scanner news and offers (you can unsubscribe any time)</label>
+ <button class="go" id="send">Open the free scanner</button>
+ <div class="msg" id="gmsg"></div>
+ <p style="font-size:12px;margin-top:14px">Already a member? <a href="../live/" style="color:#7cc4f5">Sign in for the live scanner</a>.<br>We never sell your email. By continuing you agree to the <a href="../terms.html" style="color:#7cc4f5">Terms</a>. Not financial advice.</p>
+</div></div>
+<script>
+const G=id=>document.getElementById(id);
+const _bar=document.createElement('div');_bar.id='fbar';
+_bar.innerHTML='&#9203; <span><b>Free view: 15 minutes delayed.</b> Members see every alert live, plus gold breaks, 100K HERE and UNDER THE LINES.</span><a class="unl" href="../#pricing">Unlock live &middot; $50/mo</a>';
+document.body.insertBefore(_bar,document.body.firstChild);
+async function pull(){
+  try{const r=await _realFetch(SB+'/rest/v1/free_board?id=eq.1&select=data,updated_at',{headers:{apikey:KEY,Authorization:'Bearer '+KEY},cache:'no-store'});
+    const j=await r.json();const row=j&&j[0];if(!row||!row.data||!row.data.as_of_et)return false;
+    DATA=row.data;LAST_AT=new Date(row.updated_at);return true}catch(e){return false}}
+let started=false;
+async function open_(){G('gate').style.display='none';if(started)return;started=true;
+  await pull();try{all()}catch(e){}
+  setInterval(pull,20000)}
+const EMRE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+G('send').onclick=async()=>{const e=(G('em').value||'').trim().toLowerCase();
+  if(!EMRE.test(e)||e.length>254){G('gmsg').textContent='Enter a real email address.';return}
+  G('send').disabled=true;G('gmsg').textContent='Opening...';
+  try{const r=await _realFetch(SB+'/rest/v1/leads',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify({email:e,consent:G('ok').checked,source:'free15'})});
+    if(!r.ok&&r.status!==409){G('send').disabled=false;G('gmsg').textContent='Could not save that email, please try again.';return}
+  }catch(err){}
+  try{localStorage.setItem('h2_free_ok','1')}catch(err){}
+  open_()};
+G('em').addEventListener('keydown',ev=>{if(ev.key==='Enter')G('send').click()});
+let ok0=false;try{ok0=localStorage.getItem('h2_free_ok')==='1'}catch(e){}
+if(ok0)open_();else G('gate').style.display='flex';
+</script>
+</body></html>
