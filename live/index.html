@@ -129,6 +129,7 @@ tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td
 .rbtag.gold{background:#ffc83d;color:#3a2a05}.rbtag.push{background:#ff3b3b;color:#2a0507}
 .rbtag.old.gold{background:#3a2a05;color:#ffd666}.rbtag.old.push{background:#3b0d12;color:#ff8a8a}
 #ringbar{display:none;align-items:center;gap:10px;border:2px solid #ffc83d;border-radius:8px;padding:6px 10px;margin:2px 0 4px;cursor:pointer}
+#ringbar.idle{border:1px dashed #3a4150;background:#151922;cursor:default}
 #ringbar.gold{border-color:#ffc83d;background:#3a2a05}#ringbar.push{border-color:#ff3b3b;background:#3b0d12}
 #ringbar.gold.live{animation:rbflash 1.4s infinite}#ringbar.push.live{animation:rbflashr 1.4s infinite}
 #ringbar .rbt{font-size:15px;font-weight:800;color:#fff}#ringbar .rbw{font-size:12px;color:#e6d6a8}
@@ -271,7 +272,10 @@ document.addEventListener('click',e=>{if(e.target&&e.target.id==='bellbtn')retur
 function bellCheck(){const now=new Set();
   Object.values(GOLDSET).forEach(o=>now.add('B|'+o.sym+'|'+o.since));
   document.querySelectorAll('.arow.first1gold[data-s]').forEach(r=>now.add('F|'+r.dataset.s));
-  if(BELL_SEEN===null){BELL_SEEN=now;bellBtn();return}          // first look after the page opens: no ring for old gold
+  if(BELL_SEEN===null){BELL_SEEN=now;bellBtn();              // first look after the page opens: no ring for old gold
+    now.forEach(k=>{const p=k.split('|');const r=document.querySelector('.arow[data-s="'+p[1]+'"]');   // ...but show it on the bar (11-18)
+      ringAdd(p[1],'gold',p[0]==='B'?(GLINE+' break + 100k'):'1st alert + 100k',p[0]==='B'?((p[2]||'')+''):((r&&r.dataset.at)||hmsNow()))});
+    return}
   let fresh=false;now.forEach(k=>{if(!BELL_SEEN.has(k)){fresh=true;BELL_SEEN.add(k);
     const p=k.split('|');ringAdd(p[1],'gold',p[0]==='B'?(GLINE+' break + 100k'):'1st alert + 100k')}});
   if(fresh&&BELL_ON)bellSound();bellBtn()}
@@ -509,9 +513,10 @@ function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac
 const RING_MS=120000;let RANG=[];
 try{RANG=JSON.parse(localStorage.getItem('h2_rang_'+ETDAY)||'[]')}catch(e){}
 function hmsNow(){return new Date().toLocaleTimeString('en-US',{hour12:false,timeZone:'America/New_York'})}
-function ringAdd(sym,kind,why){const x=VOL[sym]||{};
-  if(RANG.some(r=>r.sym===sym&&r.kind===kind&&Date.now()-r.t<300000))return;   // same stock + same bell within 5 min (page reload) = not a new ring
-  RANG.unshift({sym:sym,kind:kind,why:why,at:hmsNow(),t:Date.now(),px:x.px||null,vol:vScore(sym)||null});
+function ringAdd(sym,kind,why,oldAt){const x=VOL[sym]||{};
+  if(RANG.some(r=>r.sym===sym&&r.kind===kind&&(oldAt||Date.now()-r.t<300000)))return;   // same stock + same bell within 5 min (page reload) = not a new ring
+  // oldAt = it was already lit when this page opened: listed (not shaking, no sound) with its own time
+  RANG.unshift({sym:sym,kind:kind,why:why,at:oldAt||hmsNow(),t:oldAt?Date.now()-RING_MS-1:Date.now(),px:x.px||null,vol:vScore(sym)||null});
   RANG=RANG.slice(0,30);try{localStorage.setItem('h2_rang_'+ETDAY,JSON.stringify(RANG))}catch(e){}
   ringPaint()}
 function ringLast(s){for(const r of RANG)if(r.sym===s)return r;return null}
@@ -521,7 +526,9 @@ function ringHtml(s){const r=ringLast(s);if(!r)return '';const live=Date.now()-r
     +'<span class="rbtag '+r.kind+(live?'':' old')+'">RANG '+r.at.slice(0,5)+(r.kind==='push'?' PUSH':'')+'</span>'}
 function ringPaint(){
   const b=$('ringbar');if(!b)return;const r=RANG[0];
-  if(!r){b.style.display='none'}else{const live=Date.now()-r.t<RING_MS;
+  if(!r){b.className='idle';b.style.display='flex';   // 11-18: always visible, so you can see the bell bar is there
+    b.innerHTML='<span class="rbell" style="font-size:20px;color:#8a93a3">&#128276;</span><div style="flex:1"><div class="rbt" style="color:#c9d1dd;font-size:13px">No bell yet since you opened this page</div>'
+      +'<div class="rbw" style="color:#8a93a3">When one rings, the stock that rang shows here, and its bell shakes on its card</div></div>'}else{const live=Date.now()-r.t<RING_MS;
     b.className=r.kind+(live?' live':'');b.style.display='flex';
     b.innerHTML='<span class="rbell'+(live?' ringing':'')+'" style="font-size:24px;color:'+(r.kind==='push'?'#ff6b6b':'#ffc83d')+'">&#128276;</span>'
       +'<div style="flex:1"><div class="rbt">'+r.sym+' rang &middot; '+r.at+'</div>'
