@@ -119,6 +119,23 @@ tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td
 <h1 style="font-size:22px;letter-spacing:1px">HOT 2 <span style="color:#ff3df0">SCANNER</span></h1>
 <div class="sub" id="hdr">loading...</div>
 <button id="bellbtn" onclick="bellToggle()" style="border:1px solid #ffd000;border-radius:6px;padding:3px 10px;font-weight:800;font-size:12px;cursor:pointer;margin:2px 0 6px;background:#5a4300;color:#fff">&#128276; Gold bell</button>
+<style>
+@keyframes rbring{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(20deg)}20%{transform:rotate(-18deg)}30%{transform:rotate(13deg)}40%{transform:rotate(-10deg)}50%{transform:rotate(6deg)}}
+@keyframes rbflash{0%,100%{background:#3a2a05}50%{background:#6b4d08}}
+@keyframes rbflashr{0%,100%{background:#3b0d12}50%{background:#6e1520}}
+.rbell{display:inline-block;margin:0 3px;font-size:15px;transform-origin:50% 10%}
+.rbell.ringing{animation:rbring 1.4s ease-in-out infinite;font-size:18px}
+.rbtag{display:inline-block;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:800;margin-right:4px}
+.rbtag.gold{background:#ffc83d;color:#3a2a05}.rbtag.push{background:#ff3b3b;color:#2a0507}
+.rbtag.old.gold{background:#3a2a05;color:#ffd666}.rbtag.old.push{background:#3b0d12;color:#ff8a8a}
+#ringbar{display:none;align-items:center;gap:10px;border:2px solid #ffc83d;border-radius:8px;padding:6px 10px;margin:2px 0 4px;cursor:pointer}
+#ringbar.gold{border-color:#ffc83d;background:#3a2a05}#ringbar.push{border-color:#ff3b3b;background:#3b0d12}
+#ringbar.gold.live{animation:rbflash 1.4s infinite}#ringbar.push.live{animation:rbflashr 1.4s infinite}
+#ringbar .rbt{font-size:15px;font-weight:800;color:#fff}#ringbar .rbw{font-size:12px;color:#e6d6a8}
+#ringlist{font-size:11px;color:#8a93a3;margin:0 0 6px}
+.rbflashrow{outline:3px solid #fff!important}
+</style>
+<div id="ringbar" onclick="ringJump()"></div><div id="ringlist"></div>
 <div class="volbar" id="volnote"></div>
 <div class="k100" id="k100"></div>
 <div id="goldbar" style="display:none;border:3px solid #ffd000;color:#fff;font-weight:800;font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px;animation:g1blink 1s ease-in-out infinite"></div>
@@ -133,7 +150,7 @@ tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td
 <h2 style="color:#f5c542">&#128276; HOT 2 ALERTS <span class="dim" id="alsub"></span></h2>
 <div class="alertbox" id="alerts"><div class="empty">loading...</div></div>
 
-<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">box breakout + 100k/min, UNDER YHOD and PMHOD &middot; from 9:30 also FRESH = 1st 100k green candle under today's PM high &middot; top 5 by volume (new FRESH pinned 3 min) &middot; look only &middot; <span id="ulsub"></span></span></h2>
+<h2 style="color:#1fd3ea">&#128309; UNDER THE LINES <span class="dim">momentum BEFORE it reaches YHOD: 100k/min + up 10%, still UNDER YHOD (yesterday's high incl. pre + after hours) &middot; from 9:30 also FRESH = 1st 100k green candle under today's PM high &middot; top 5 by volume (new FRESH pinned 3 min) &middot; look only &middot; <span id="ulsub"></span></span></h2>
 <div class="ulbox" id="under"><div class="empty">loading...</div></div>
 
 <h2 class="yl">&#128293; HOT NOW <span class="dim" id="hnsub"></span></h2>
@@ -255,7 +272,8 @@ function bellCheck(){const now=new Set();
   Object.values(GOLDSET).forEach(o=>now.add('B|'+o.sym+'|'+o.since));
   document.querySelectorAll('.arow.first1gold[data-s]').forEach(r=>now.add('F|'+r.dataset.s));
   if(BELL_SEEN===null){BELL_SEEN=now;bellBtn();return}          // first look after the page opens: no ring for old gold
-  let fresh=false;now.forEach(k=>{if(!BELL_SEEN.has(k)){fresh=true;BELL_SEEN.add(k)}});
+  let fresh=false;now.forEach(k=>{if(!BELL_SEEN.has(k)){fresh=true;BELL_SEEN.add(k);
+    const p=k.split('|');ringAdd(p[1],'gold',p[0]==='B'?(GLINE+' break + 100k'):'1st alert + 100k')}});
   if(fresh&&BELL_ON)bellSound();bellBtn()}
 let PMHG={},PMHARM={},PMHLV={};   // PMHLV = HOT 2's own "broke premarket high X" level (exact); else our live-candle high
 function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
@@ -387,7 +405,7 @@ async function loadAlerts(){
         +'" data-n="'+(k.n||1)+'" data-s="'+k.sym+'" data-first5="'+((k.n||1)<=1&&k.rank&&k.rank<=5?1:0)+'" data-at="'+(k.at||'')+'">'
         +'<div class="aline">'
         +'<span class="at">'+(k.at||'')+'</span>'
-        +'<span class="sym yl">'+k.sym+'</span>'
+        +'<span class="sym yl">'+k.sym+'</span><span class="rbwrap">'+ringHtml(k.sym)+'</span>'
         +(k.rank?'<span class="dim">#'+k.rank+'</span>':'')
         +(k.tier?'<span class="pill '+(PILL[k.tier]||'pm')+'">'+k.tier+'</span>':'')
         +'<span class="acnt">x'+(k.n||1)+'</span>'
@@ -457,7 +475,7 @@ async function loadHot(){
 }
 async function all(){
   try{await Promise.all([loadBrk(),loadAlerts(),loadHot()]);$('err').style.display='none';
-    await fillVol();applyPmh()}
+    await fillVol();applyPmh();ringPaint()}
   catch(e){$('err').style.display='block';
     $('err').textContent='waiting for live data...'}
 }
@@ -477,7 +495,8 @@ async function load100k(){
     r.classList.toggle('k100row',!!(s&&K100[s]));if(s&&K100[s])lit.add('P|'+s+'|'+K100[s].at)});
   // 11-17 his ask: the CONSOLIDATION PUSH bell -- two low beeps, once per NEW push, only when its red row is on screen
   if(PUSH_SEEN===null){PUSH_SEEN=lit;return}
-  let newPush=false;lit.forEach(k=>{if(!PUSH_SEEN.has(k)){newPush=true;PUSH_SEEN.add(k)}});
+  let newPush=false;lit.forEach(k=>{if(!PUSH_SEEN.has(k)){newPush=true;PUSH_SEEN.add(k);
+    const p=k.split('|'),o=K100[p[1]]||{};ringAdd(p[1],'push','consolidation push'+(o.close?' close '+o.close:''))}});
   if(newPush&&BELL_ON)pushSound();
 }
 let PUSH_SEEN=null;
@@ -485,6 +504,43 @@ function pushSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac
   [0,0.3].forEach(d=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=330;
     g.gain.setValueAtTime(0.0001,ac.currentTime+d);g.gain.exponentialRampToValueAtTime(0.45,ac.currentTime+d+0.01);
     g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.25);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+d);o.stop(ac.currentTime+d+0.28)})}
+// 11-18 his ask: "a bell on the ticker that's ringing" -- WHO rang, WHY, and WHEN. Bar on top + bell on the ticker's
+// card and board rows: shakes for 2 min, then a still bell with the time. Saved per day in this browser.
+const RING_MS=120000;let RANG=[];
+try{RANG=JSON.parse(localStorage.getItem('h2_rang_'+ETDAY)||'[]')}catch(e){}
+function hmsNow(){return new Date().toLocaleTimeString('en-US',{hour12:false,timeZone:'America/New_York'})}
+function ringAdd(sym,kind,why){const x=VOL[sym]||{};
+  if(RANG.some(r=>r.sym===sym&&r.kind===kind&&Date.now()-r.t<300000))return;   // same stock + same bell within 5 min (page reload) = not a new ring
+  RANG.unshift({sym:sym,kind:kind,why:why,at:hmsNow(),t:Date.now(),px:x.px||null,vol:vScore(sym)||null});
+  RANG=RANG.slice(0,30);try{localStorage.setItem('h2_rang_'+ETDAY,JSON.stringify(RANG))}catch(e){}
+  ringPaint()}
+function ringLast(s){for(const r of RANG)if(r.sym===s)return r;return null}
+function ringHtml(s){const r=ringLast(s);if(!r)return '';const live=Date.now()-r.t<RING_MS;
+  const col=r.kind==='push'?'#ff6b6b':'#ffc83d';
+  return '<span class="rbell'+(live?' ringing':'')+'" style="color:'+col+'">&#128276;</span>'
+    +'<span class="rbtag '+r.kind+(live?'':' old')+'">RANG '+r.at.slice(0,5)+(r.kind==='push'?' PUSH':'')+'</span>'}
+function ringPaint(){
+  const b=$('ringbar');if(!b)return;const r=RANG[0];
+  if(!r){b.style.display='none'}else{const live=Date.now()-r.t<RING_MS;
+    b.className=r.kind+(live?' live':'');b.style.display='flex';
+    b.innerHTML='<span class="rbell'+(live?' ringing':'')+'" style="font-size:24px;color:'+(r.kind==='push'?'#ff6b6b':'#ffc83d')+'">&#128276;</span>'
+      +'<div style="flex:1"><div class="rbt">'+r.sym+' rang &middot; '+r.at+'</div>'
+      +'<div class="rbw">'+(r.kind==='push'?'Push beeps':'Gold chime')+' &middot; '+r.why
+      +(r.vol?' &middot; '+big(r.vol)+' this minute':'')+(r.px?' &middot; $'+(r.px<1?(+r.px).toFixed(4):(+r.px).toFixed(2)):'')+'</div></div>'
+      +'<span class="dim" style="font-size:11px">click = jump to it</span>'}
+  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.slice(1,7).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':' gold')+'</span>').join(''):'';
+  document.querySelectorAll('.arow[data-s] .aline .sym, td.sym').forEach(el=>{
+    const s=el.closest('.arow')?el.closest('.arow').dataset.s:el.textContent.trim().split(/\s/)[0];
+    const isTd=el.tagName==='TD';
+    let sp=isTd?el.querySelector('.rbwrap'):el.parentNode.querySelector(':scope > .rbwrap');
+    const h=ringHtml(s);
+    if(!h){if(sp)sp.remove();return}
+    if(!sp){sp=document.createElement('span');sp.className='rbwrap';if(isTd)el.appendChild(sp);else el.insertAdjacentElement('afterend',sp)}
+    if(sp.innerHTML!==h)sp.innerHTML=h})}
+function ringJump(){const r=RANG[0];if(!r)return;
+  const el=document.querySelector('.arow[data-s="'+r.sym+'"]')||[...document.querySelectorAll('td.sym')].find(t=>t.textContent.trim().startsWith(r.sym));
+  if(!el)return;const row=el.closest('tr')||el;row.scrollIntoView({behavior:'smooth',block:'center'});
+  row.classList.add('rbflashrow');setTimeout(()=>row.classList.remove('rbflashrow'),2500)}
 // UNDER THE LINES (2026-11-14) -- reads :8792, hides any name already in the HOT 2 rows above
 function lnTag(name,line,px){if(!line)return '<span class="dim">'+name+' ?</span>';
   return px<line?'<span class="lnU">UNDER '+name+' '+(+line).toPrecision(4)+'</span>':'<span class="lnA">ABOVE '+name+' '+(+line).toPrecision(4)+'</span>'}
@@ -510,10 +566,10 @@ async function loadUnder(){
     +(r.now?'<span class="dim">now '+(+r.now).toPrecision(4)+'</span>':'')
     +(r.vnow?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vnow)+'/min</span>':'')
     +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">&rarr; HOT 2 '+r.hot2+'</span>':'')
-    +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)+lnTag('PMHOD',r.pmhod,r.now||r.px)
+    +'<span class="v1chip" title="1-min volume when it fired">'+big(r.vol)+'/min</span>'+lnTag('YHOD',r.yhod,r.now||r.px)
     +'<span class="arght dim">broke out of box '+(+r.bot).toPrecision(4)+'-'+(+r.top).toPrecision(4)+' (1m + 5m)</span></div></div>').join('');
 }
-all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);
+all();setInterval(all,3000);load100k();setInterval(load100k,3000);loadGold();setInterval(loadGold,3000);loadUnder();setInterval(loadUnder,5000);ringPaint();setInterval(ringPaint,1500);
 </script><style>
 #gate{position:fixed;inset:0;background:#0f1115;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#171a21;border:1px solid #262b35;border-radius:12px;padding:24px}
