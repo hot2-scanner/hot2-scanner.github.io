@@ -99,6 +99,11 @@ tr.vtoprow td{box-shadow:inset 0 0 0 9999px rgba(255,216,77,.10)}
 tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
 .arow.k100row{border:2px solid #ff3030!important;box-shadow:0 0 12px #ff3030}
 /* 11-17 his name for it: CONSOLIDATION PUSH (was "100K HERE") -- a red tag on the red row so it says what it is */
+/* 11-17 his ask: IN THE BOX = closing inside BOTH the 1-min and 5-min consolidation boxes right now (watch it; no bell).
+   Red (the push out of the box) wins over it. */
+.arow.inbox{border:2px dashed #cfd6e0!important;background:#181c24}
+.ainbox{background:#2a2f3a;color:#e6e9ef;border:1px dashed #cfd6e0;font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;white-space:nowrap}
+tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td:first-child{border-left:3px dashed #cfd6e0}
 .arow.k100row .aline::after,tr.k100row td:nth-child(3)::after{content:'CONSOLIDATION PUSH';background:#ff3030;color:#fff;
  font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;margin-left:6px;white-space:nowrap}
 
@@ -351,7 +356,7 @@ async function loadBrk(){
       +'<td class="dim">'+big(r.sh_since)+'</td>'
       +'<td class="l dim" id="why'+i+'"></td>'
       +'<td>'+addBtn(r.sym)+'</td>';
-    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');}
+    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');if(K100[s_])tr.classList.add('k100row');else if(INBOX[s_])tr.classList.add('inboxtr');}
     b.appendChild(tr);
     const c=document.getElementById('why'+i); if(c)c.textContent=why;
   });
@@ -376,7 +381,7 @@ async function loadAlerts(){
       (k.dots||['x','x','x']).forEach(v=>{
         d+='<span class="adot '+(v==='g'?'g':(v==='r'?'r':'x'))+'"></span>';
       });
-      h+='<div class="arow'+(k.pinned?' pinned':'')+(isNew?' flash':'')+(isHot(k.sym)?' big100':'')+(GOLD&&k.sym===GOLD?' goldrow':'')+(isHot(k.sym)&&(k.n||1)<=1?' first1gold':'')+(GOLDSET[k.sym]?' pmhgold':'')+(PMHMAP[k.sym]&&PMHMAP[k.sym][3]?' pmhabove':'')
+      h+='<div class="arow'+(k.pinned?' pinned':'')+(isNew?' flash':'')+(isHot(k.sym)?' big100':'')+(GOLD&&k.sym===GOLD?' goldrow':'')+(isHot(k.sym)&&(k.n||1)<=1?' first1gold':'')+(GOLDSET[k.sym]?' pmhgold':'')+(K100[k.sym]?' k100row':(INBOX[k.sym]?' inbox':''))+(PMHMAP[k.sym]&&PMHMAP[k.sym][3]?' pmhabove':'')
         +'" data-n="'+(k.n||1)+'" data-s="'+k.sym+'" data-first5="'+((k.n||1)<=1&&k.rank&&k.rank<=5?1:0)+'" data-at="'+(k.at||'')+'">'
         +'<div class="aline">'
         +'<span class="at">'+(k.at||'')+'</span>'
@@ -389,6 +394,7 @@ async function loadAlerts(){
         +'<span class="afirst">1ST ALERT + 100K</span>'
         +'<span class="apmh">PM HIGH BREAK + 100K</span>'
         +'<span class="apmhx">'+pmhChip(k.sym)+'</span>'
+        +(INBOX[k.sym]&&!K100[k.sym]?'<span class="ainbox">IN THE BOX '+(+INBOX[k.sym].box1_lo).toPrecision(4)+' – '+(+INBOX[k.sym].box1_hi).toPrecision(4)+' (1m + 5m) since '+INBOX[k.sym].since+'</span>':'')
         +'<span class="abig">'+hotLabel(k.sym)+'</span>'
         +'<span class="alast">'+lastTag(k.sym)+'</span>'
         +'<span class="v1chip" data-vsym="'+k.sym+'">'+volHtml(k.sym)+'</span>'
@@ -443,7 +449,7 @@ async function loadHot(){
       +'<td>'+pct(r.from_hod_pct)+'</td>'
       +'<td>'+pct(r.vs_yhod_pct)+'</td>'
       +'<td>'+addBtn(r.sym)+'</td>';
-    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');}
+    {const s_=r.sym;if(isHot(s_))tr.classList.add('ptr');if(GOLD&&s_===GOLD)tr.classList.add('goldtr');if(K100[s_])tr.classList.add('k100row');else if(INBOX[s_])tr.classList.add('inboxtr');}
     b.appendChild(tr);
   });
 }
@@ -453,10 +459,10 @@ async function all(){
   catch(e){$('err').style.display='block';
     $('err').textContent='waiting for data... (the free view fills in 15 minutes after the 4:00 AM ET start)'}
 }
-let K100={};
+let K100={},INBOX={};
 async function load100k(){
-  let f;try{f=await (await fetch('http://127.0.0.1:8799/state',{cache:'no-store'})).json()}catch(e){return}
-  const now=etMin(),fresh=[];K100={};
+  let f;try{f=await (await fetch('http://127.0.0.1:8799/state',{cache:'no-store'})).json()}catch(e){INBOX={};return}
+  const now=etMin(),fresh=[];K100={};INBOX=f.inbox||{};
   (f.flash||[]).forEach(o=>{const t=(o.at||'').split(':');if(t.length<2)return;
     const age=now-((+t[0])*60+(+t[1])+(+(t[2]||0))/60);if(age>=0&&age<=15){K100[o.sym]=o;fresh.push(o)}});
   const b=$('k100');
@@ -557,4 +563,4 @@ G('em').addEventListener('keydown',ev=>{if(ev.key==='Enter')G('send').click()});
 let ok0=false;try{ok0=localStorage.getItem('h2_free_ok')==='1'}catch(e){}
 if(ok0)open_();else G('gate').style.display='flex';
 </script>
-</body></html>
+<div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font:12px/1.4 Inter,Segoe UI,Arial,sans-serif;text-align:center;padding:4px 10px;pointer-events:none">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style></body></html>
