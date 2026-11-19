@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /live/
+
+Sitemap: https://hot2-scanner.github.io/sitemap.xml
