@@ -27,6 +27,9 @@ h1{font-size:clamp(26px,4vw,38px);margin:26px 0 4px}h1 b{color:var(--hot)}
 .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid #ffd34d;border-radius:10px;padding:12px 14px;color:#c9d1d9;margin:0 0 18px}
 .up{background:#0f2e1c;color:#4ade80}.dn{background:#3b0d12;color:#ff8a8a}.fl{background:#1d2633;color:#c9d1d9}
 .empty{color:var(--dim);padding:30px 0}
+.cta{margin:28px 0 8px;background:linear-gradient(135deg,#2a0d27,#121923);border:1px solid #ff3df0;border-radius:14px;padding:20px;text-align:center}
+.cta h2{margin:0 0 6px;font-size:22px}.cta p{color:#c9d1d9;margin:0 0 14px}
+.disc{margin:22px 0 10px;color:var(--dim);font-size:13px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px}.disc b{color:#c9d1d9}
 .hits{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hit{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px}
 .h2{background:#3a2a06;color:#ffb347}.hg{background:#ffd000;color:#3a2a05}.hp{background:#3b0d12;color:#ff8a8a}
 .card.caught{border-color:#ffb347}
@@ -49,12 +52,13 @@ body{padding-bottom:30px}
 <h1>Recent <b>Runners</b></h1>
 <p class="lead">Stocks that ran <b>+100% or more on the daily chart in the last 10 trading days</b>, and when the HOT 2 scanner <b>first alerted them on the way up</b>. Updated every trading day at 4:00 AM ET.</p>
 <div class="meta" id="meta"></div>
-<div class="note"><b>Read this first.</b> These stocks were picked <b>because they ran</b>. Most HOT 2 alerts do not turn into runs like these, and past alerts don&rsquo;t predict future results. Prices are the alert price and the run&rsquo;s closing high on the daily chart.</div>
 <div class="key"><span><i style="color:#9aa0a6"></i>top of the run</span><span><i style="color:#ffe600"></i>25% back</span><span><i style="color:#ff3b3b"></i>50% back (red line)</span><span><i style="color:#6eafeb;border-top-style:dashed"></i>previous day's high</span><span>last 30 daily candles</span></div>
 <div id="fasum"></div>
 <div id="sum"></div>
 <div class="grid" id="grid"><div class="empty">Loading...</div></div>
 <div id="ysec"></div>
+
+<div class="disc"><b>Disclaimer.</b> These stocks were picked <b>because they ran</b>; most HOT 2 alerts do not turn into runs like these. Past alerts and results do not promise or predict future results. Trading stocks, especially low-float and premarket stocks, is very risky and you can lose money. HOT 2 Scanner is for information and education only and is not financial advice. Prices shown are the alert price and the run&rsquo;s closing high on the daily chart. See the <a href="../terms.html">Terms of Service</a>.</div>
 </main>
 <div id="riskbar">Trading is risky and you can lose money. Not financial advice. For information and education only.</div>
 <script>
@@ -82,8 +86,8 @@ function faHtml(x){const a=x.first_alert;if(!a)return '';const d=String(a.day).s
 function render(doc,scored,lateNote){
   let rows=doc.rows||[];const H={};
   const all=rows.length;
-  if(!scored){rows=rows.filter(x=>x.first_alert).sort((a,b)=>b.first_alert.to_top_pct-a.first_alert.to_top_pct);
-    G('fasum').innerHTML='<div class="note" style="border-left-color:#ff3df0"><b>HOT 2 alerted '+rows.length+' of the '+all+' stocks that ran +100% in the last 10 trading days.</b> Each card shows when the scanner first alerted it during the run and the price it alerted at.</div>'}
+  if(!scored){rows=rows.filter(x=>x.first_alert).sort((a,b)=>b.first_alert.to_top_pct-a.first_alert.to_top_pct);const nAl=rows.length;rows=rows.slice(0,10);
+    G('fasum').innerHTML='<div class="note" style="border-left-color:#ff3df0"><b>HOT 2 alerted '+nAl+' of the '+all+' stocks that ran +100% in the last 10 trading days.</b> Here are the top 10, with when the scanner first alerted each one on the way up.</div>'}
   G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
   if(false){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
       +(c.length?' &mdash; '+c.map(x=>{const h=H[x.sym];return '<b>'+esc(x.sym)+'</b> '+(h.alert?esc(h.alert.at):(h.gold?'gold '+esc(h.gold[0]):'push '+esc((h.push||[''])[0])))}).join(', '):'. Updates through the day.')
