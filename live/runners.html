@@ -99,7 +99,7 @@ function render(doc,scored,lateNote){
   G('grid').innerHTML=rows.map(x=>{const z=ZONE[x.zone]||['',''];let res='';
     if(scored&&x.result){const h=x.result.high_pct,c=x.result.close_pct;const cls=h>=30?'up':(c<0?'dn':'fl');
       res='<div class="res '+cls+'">that day: high '+(h>=0?'+':'')+h+'% &middot; close '+(c>=0?'+':'')+c+'%</div>'}
-    return '<div class="card'+(H[x.sym]?' caught':'')+'"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
+    return '<div class="card'+(H[x.sym]?' caught':'')+'"><div class="hd"><a class="sym" style="color:inherit;text-decoration:none" href="/stocks/'+esc(x.sym.toLowerCase())+'.html">'+esc(x.sym)+'</a><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
       +(x.days_ago==0?'ended the day before':'ended '+x.days_ago+' day'+(x.days_ago==1?'':'s')+' before')+'</span></div>'+svg(x)
       +'<div class="facts"><span>run <b>'+f(x.run_from)+' &rarr; '+f(x.run_to)+'</b></span><span>close <b>'+f(x.close)+'</b></span><span>prev high <b style="color:#6eafeb">'+f(x.yhigh)+'</b></span></div>'
       +faHtml(x)+hitHtml(H[x.sym])+res+'</div>'}).join('')}
