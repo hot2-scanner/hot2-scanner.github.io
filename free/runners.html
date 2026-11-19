@@ -47,9 +47,9 @@ body{padding-bottom:30px}
 <header><div class="nav"><a class="logo" href="../index.html">HOT 2 <b>SCANNER</b></a><div><a class="l" href="./">Free scanner</a><a class="l" href="../#pricing">Join</a></div></div></header>
 <main class="wrap">
 <h1>Recent <b>Runners</b></h1>
-<p class="lead">Stocks that ran <b>+100% or more on the daily chart in the last 10 trading days</b>. Stocks that just ran are the ones most likely to run again, so these are the names to keep an eye on.</p>
+<p class="lead">Stocks that ran <b>+100% or more on the daily chart in the last 10 trading days</b>, and when the HOT 2 scanner <b>first alerted them on the way up</b>. Updated every trading day at 4:00 AM ET.</p>
 <div class="meta" id="meta"></div>
-<div class="note"><b>Set your expectations.</b> In our history test about <b>1 in 10</b> of these names traded 30%+ above the previous close the next day, against about 1 in 100 for an average stock. Most don&rsquo;t, and some drop hard. A list to watch, not a list to buy. New list every trading day at 4:00 AM ET. <a class="unl" href="../#pricing" style="margin-left:6px">Get the live scanner</a></div>
+<div class="note"><b>Read this first.</b> These stocks were picked <b>because they ran</b>. Most HOT 2 alerts do not turn into runs like these, and past alerts don&rsquo;t predict future results. Prices are the alert price and the run&rsquo;s closing high on the daily chart. <a class="unl" href="../#pricing" style="margin-left:6px">Get the live scanner</a></div>
 <div class="key"><span><i style="color:#9aa0a6"></i>top of the run</span><span><i style="color:#ffe600"></i>25% back</span><span><i style="color:#ff3b3b"></i>50% back (red line)</span><span><i style="color:#6eafeb;border-top-style:dashed"></i>previous day's high</span><span>last 30 daily candles</span></div>
 <div id="fasum"></div>
 <div id="sum"></div>
@@ -78,12 +78,14 @@ function hitHtml(h){if(!h)return '';let s='';
   (h.push||[]).forEach(t=>s+='<span class="hit hp">push '+esc(t)+'</span>');
   return s?'<div class="hits">'+s+'</div>':''}
 function faHtml(x){const a=x.first_alert;if(!a)return '';const d=String(a.day).slice(5).replace('-','/');const t=a.to_top_pct;
-  return '<div class="fa">&#128276; HOT 2 first alert <b>'+d+' '+esc(String(a.at).slice(0,5))+'</b> @ <b>'+f(a.px)+'</b> &rarr; top '+f(x.run_to)+' <b style="color:'+(t>=0?'#4ade80':'#ff8a8a')+'">('+(t>=0?'+':'')+t+'%)</b></div>'}
+  return '<div class="fa">&#128276; HOT 2 first alert <b>'+d+' '+esc(String(a.at).slice(0,5))+'</b> @ <b>'+f(a.px)+'</b> &rarr; '+(t>=10?'ran to '+f(x.run_to)+' <b style="color:#4ade80">(+'+Math.round(t)+'%)</b>':'<span style="color:#c9d1d9">alerted near the top of the run</span>')+'</div>'}
 function render(doc,scored,lateNote){
-  const rows=doc.rows||[],H=doc.hits||{};
-  if(!scored){const fa=rows.filter(x=>x.first_alert);G('fasum').innerHTML=fa.length?'<div class="note" style="border-left-color:#ff3df0"><b>The HOT 2 scanner alerted '+fa.length+' of these '+rows.length+' on the way up.</b> Each card shows when HOT 2 first alerted it during the run, the price, and how far it went from there to the top of the run. Some alerts came near the top, and those are shown too.</div>':''}
+  let rows=doc.rows||[];const H={};
+  const all=rows.length;
+  if(!scored){rows=rows.filter(x=>x.first_alert).sort((a,b)=>b.first_alert.to_top_pct-a.first_alert.to_top_pct);
+    G('fasum').innerHTML='<div class="note" style="border-left-color:#ff3df0"><b>HOT 2 alerted '+rows.length+' of the '+all+' stocks that ran +100% in the last 10 trading days.</b> Each card shows when the scanner first alerted it during the run and the price it alerted at.</div>'}
   G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
-  if(!scored){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
+  if(false){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
       +(c.length?' &mdash; '+c.map(x=>{const h=H[x.sym];return '<b>'+esc(x.sym)+'</b> '+(h.alert?esc(h.alert.at):(h.gold?'gold '+esc(h.gold[0]):'push '+esc((h.push||[''])[0])))}).join(', '):'. Updates through the day.')
       +(lateNote?'<br><span style="color:var(--dim);font-size:13px">'+lateNote+'</span>':'')+'</div>'}
   if(scored){const r=rows.filter(x=>x.result),big=r.filter(x=>x.result.high_pct>=30).length;
@@ -96,7 +98,7 @@ function render(doc,scored,lateNote){
     return '<div class="card'+(H[x.sym]?' caught':'')+'"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
       +(x.days_ago==0?'ended the day before':'ended '+x.days_ago+' day'+(x.days_ago==1?'':'s')+' before')+'</span></div>'+svg(x)
       +'<div class="facts"><span>run <b>'+f(x.run_from)+' &rarr; '+f(x.run_to)+'</b></span><span>close <b>'+f(x.close)+'</b></span><span>prev high <b style="color:#6eafeb">'+f(x.yhigh)+'</b></span></div>'
-      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+faHtml(x)+hitHtml(H[x.sym])+res+'</div>'}).join('')}
+      +faHtml(x)+hitHtml(H[x.sym])+res+'</div>'}).join('')}
 function yesterday(doc){if(!doc||!doc.rows)return;const r=doc.rows.filter(x=>x.result).sort((a,b)=>b.result.high_pct-a.result.high_pct);
   const big=r.filter(x=>x.result.high_pct>=30).length;
   G('ysec').innerHTML='<h2 style="margin:34px 0 6px">How yesterday&rsquo;s list did ('+esc(doc.day)+')</h2><p class="lead">'+big+' of '+r.length+' traded 30%+ above their previous close at some point that day. Every name is shown, winners and losers.</p>'
@@ -105,7 +107,7 @@ function yesterday(doc){if(!doc||!doc.rows)return;const r=doc.rows.filter(x=>x.r
 </script>
 <div id="gate"><div class="box">
  <h2>Recent <span style="color:#ff3df0">Runners</span></h2>
- <p>Today&rsquo;s watch list of stocks that just ran, free every trading day at 4:00 AM ET. Enter your email to open it.</p>
+ <p>See the stocks that just ran +100% and when the HOT 2 scanner first alerted them, free. Enter your email to open it.</p>
  <input id="em" type="email" placeholder="you@example.com" autocomplete="email">
  <label><input id="ok" type="checkbox" checked> Email me scanner news and offers (you can unsubscribe any time)</label>
  <button class="go" id="send">Open the list</button>
@@ -119,7 +121,7 @@ async function load(){
     const j=await r.json();const row=j&&j[0];
     const T=row&&row.data&&(row.data.today||(row.data.rows?row.data:null));
     if(!T){G('grid').innerHTML='<div class="empty">Today&rsquo;s list is not ready yet. Check back after 4:00 AM ET.</div>';return}
-    render(T,false,'Free view: scanner alerts show here 15 minutes after they happen. Members get them live, with bells.');yesterday(row.data.yesterday)}catch(e){G('grid').innerHTML='<div class="empty">Could not load the list. Please refresh.</div>'}}
+    render(T,false,'')}catch(e){G('grid').innerHTML='<div class="empty">Could not load the list. Please refresh.</div>'}}
 const EMRE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 let ok=false;try{ok=localStorage.getItem('h2_free_ok')==='1'||localStorage.getItem('h2_runners_ok')==='1'}catch(e){}
 if(ok){load()}else{G('gate').style.display='flex'}
