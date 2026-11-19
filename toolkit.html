@@ -47,11 +47,22 @@ footer p{margin:0 0 10px}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out;padding:12px}
 #lb img{max-width:100%;max-height:100%}
 </style>
-<style>.getbox{background:linear-gradient(135deg,#2a0d27,#121923);border:1px solid #ff3df0;border-radius:14px;padding:18px 20px;margin:18px 0 6px}.getbox h2{margin:0 0 6px;font-size:21px;border:0;padding:0}.getbox p{color:#c9d1d9;margin:0 0 12px}.unl{background:#ff3df0;color:#fff!important;text-decoration:none;font-weight:800;padding:9px 18px;border-radius:8px;display:inline-block}.lk{font:700 15px ui-monospace,Consolas,monospace;background:#0b0f15;border:1px solid #223042;border-radius:8px;padding:9px 12px;display:inline-block;margin:0 8px 8px 0;color:#fff;user-select:all}</style></head>
+<style>.getbox{background:linear-gradient(135deg,#2a0d27,#121923);border:1px solid #ff3df0;border-radius:14px;padding:18px 20px;margin:18px 0 6px}.getbox h2{margin:0 0 6px;font-size:21px;border:0;padding:0}.getbox p{color:#c9d1d9;margin:0 0 12px}.unl{background:#ff3df0;color:#fff!important;text-decoration:none;font-weight:800;padding:9px 18px;border-radius:8px;display:inline-block}.lk{font:700 15px ui-monospace,Consolas,monospace;background:#0b0f15;border:1px solid #223042;border-radius:8px;padding:9px 12px;display:inline-block;margin:0 8px 8px 0;color:#fff;user-select:all}</style><style id="h2menu-css">
+.h2m{position:relative;display:inline-block;margin-right:12px;vertical-align:middle}
+.h2m>button{background:#121923;border:1px solid #2b3a50;color:#e7edf5;font:700 14px Inter,Segoe UI,Arial,sans-serif;padding:8px 14px;border-radius:9px;cursor:pointer}
+.h2m>button:hover,.h2m.open>button{border-color:#ff3df0}
+.h2m .pan{display:none;position:absolute;right:0;top:calc(100% + 8px);width:340px;max-width:calc(100vw - 24px);background:#121923;border:1px solid #2b3a50;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:6px;z-index:60}
+.h2m.open .pan{display:block}
+.h2m .pan a{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:9px;text-decoration:none;color:#e7edf5}
+.h2m .pan a:hover{background:#1a2432}
+.h2m .pan .ic{font-size:20px;line-height:1.2;width:24px;text-align:center;flex:none}
+.h2m .pan b{display:block;font-size:15px}.h2m .pan span.d{display:block;color:#8a97a8;font-size:12.5px;line-height:1.35;margin-top:1px}
+@media (max-width:600px){.nav .logo{font-size:16px;white-space:nowrap}.h2ga,.nav .btn{padding:7px 10px!important;font-size:13px!important;white-space:nowrap}.h2m>button{padding:7px 10px;font-size:13px}.h2m{margin-right:6px}.h2m{position:static}.h2m .pan{left:12px;right:12px;width:auto;top:60px}}
+</style><style>.h2ga{background:#ff3df0;color:#fff!important;font-weight:800;padding:9px 16px;border-radius:9px;text-decoration:none;font-size:14px}</style></head>
 <body>
 <header><div class="wrap nav">
   <a class="logo" href="index.html">HOT 2 <b>SCANNER</b></a>
-  <div><a class="l" href="guide.html">Guide</a><a class="l" href="#install">Install</a><a class="l" href="index.html#pricing">Join</a></div>
+  <div><div class="h2m" id="h2m"><button type="button" aria-haspopup="true" aria-expanded="false">Menu &#9662;</button><div class="pan" role="menu"><a href="free/"><span class="ic">&#128293;</span><span><b>Free scanner</b><span class="d">the real scanner, 15 minutes delayed</span></span></a><a href="free/runners.html"><span class="ic">&#128200;</span><span><b>Recent Runners</b><span class="d">stocks that ran, and when HOT 2 alerted them on the way up</span></span></a><a href="toolkit.html"><span class="ic">&#129520;</span><span><b>thinkorswim Toolkit</b><span class="d">9 studies that draw the same lines the scanner alerts on</span></span></a><a href="guide.html"><span class="ic">&#128214;</span><span><b>Guide</b><span class="d">what every color and label on the screen means</span></span></a><a href="index.html#pricing"><span class="ic">&#128176;</span><span><b>Pricing</b><span class="d">$50 a month or $365 a year, toolkit included</span></span></a><a href="live/"><span class="ic">&#128273;</span><span><b>Members sign in</b><span class="d">the live scanner, Recent Runners and your toolkit link</span></span></a><a href="mailto:hot2alerts@gmail.com"><span class="ic">&#9993;&#65039;</span><span><b>Contact</b><span class="d">hot2alerts@gmail.com</span></span></a></div></div><a class="h2ga" href="index.html#pricing">Get access</a></div>
 </div></header>
 
 <main class="wrap">
@@ -124,5 +135,8 @@ footer p{margin:0 0 10px}
 document.querySelectorAll('.shot img').forEach(function(i){i.onclick=function(){var b=document.getElementById('lb');b.querySelector('img').src=i.src;b.style.display='flex';};});
 document.getElementById('lb').onclick=function(){this.style.display='none';};
 </script>
-<div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font-size:12px;text-align:center;padding:4px 10px">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style></body>
+<div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font-size:12px;text-align:center;padding:4px 10px">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style><script id="h2menu-js">(function(){var m=document.getElementById('h2m');if(!m)return;var b=m.querySelector('button');
+b.addEventListener('click',function(e){e.stopPropagation();var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o)});
+document.addEventListener('click',function(e){if(!m.contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false')}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){m.classList.remove('open');b.setAttribute('aria-expanded','false')}});})();</script></body>
 </html>
