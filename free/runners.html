@@ -27,6 +27,10 @@ h1{font-size:clamp(26px,4vw,38px);margin:26px 0 4px}h1 b{color:var(--hot)}
 .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid #ffd34d;border-radius:10px;padding:12px 14px;color:#c9d1d9;margin:0 0 18px}
 .up{background:#0f2e1c;color:#4ade80}.dn{background:#3b0d12;color:#ff8a8a}.fl{background:#1d2633;color:#c9d1d9}
 .empty{color:var(--dim);padding:30px 0}
+.hits{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hit{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px}
+.h2{background:#3a2a06;color:#ffb347}.hg{background:#ffd000;color:#3a2a05}.hp{background:#3b0d12;color:#ff8a8a}
+.card.caught{border-color:#ffb347}
+.yt{width:100%;border-collapse:collapse;font-size:14px}.yt td,.yt th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}.yt th{color:var(--dim);font-weight:600}
 #gate{position:fixed;inset:0;background:rgba(7,10,14,.96);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#121923;border:1px solid #223042;border-radius:14px;padding:22px}
 #gate h2{margin:0 0 6px;font-size:22px}#gate p{color:#c9d1d9;margin:0 0 12px;font-size:14.5px}
@@ -44,10 +48,11 @@ body{padding-bottom:30px}
 <h1>Recent <b>Runners</b></h1>
 <p class="lead">Stocks that ran <b>+100% or more on the daily chart in the last 10 trading days</b>. Stocks that just ran are the ones most likely to run again, so these are the names to keep an eye on.</p>
 <div class="meta" id="meta"></div>
-<div class="note"><b>Free view: yesterday&rsquo;s list, with how each name did.</b> Members get the new list every trading day at <b>4:00 AM ET</b>, before the premarket moves. <a class="unl" href="../#pricing" style="margin-left:6px">Get today&rsquo;s list</a></div>
+<div class="note"><b>Set your expectations.</b> In our history test about <b>1 in 10</b> of these names traded 30%+ above the previous close the next day, against about 1 in 100 for an average stock. Most don&rsquo;t, and some drop hard. A list to watch, not a list to buy. New list every trading day at 4:00 AM ET. <a class="unl" href="../#pricing" style="margin-left:6px">Get the live scanner</a></div>
 <div class="key"><span><i style="color:#9aa0a6"></i>top of the run</span><span><i style="color:#ffe600"></i>25% back</span><span><i style="color:#ff3b3b"></i>50% back (red line)</span><span><i style="color:#6eafeb;border-top-style:dashed"></i>previous day's high</span><span>last 30 daily candles</span></div>
 <div id="sum"></div>
 <div class="grid" id="grid"><div class="empty">Loading...</div></div>
+<div id="ysec"></div>
 </main>
 <div id="riskbar">Trading is risky and you can lose money. Not financial advice. For information and education only.</div>
 <script>
@@ -65,9 +70,17 @@ function svg(x){const C=x.candles||[];const W=300,H=130,P=6;
       +'<rect x="'+(xx-bw*.35).toFixed(1)+'" y="'+y1.toFixed(1)+'" width="'+(bw*.7).toFixed(1)+'" height="'+Math.max(1,y2-y1).toFixed(1)+'" fill="'+col+'"/>'});
   return s+'</svg>'}
 const ZONE={'top':['near the top','#9aa0a6'],'yellow-red':['between yellow and red','#ffe600'],'under-red':['under the red line','#ff6b6b']};
-function render(doc,scored){
-  const rows=doc.rows||[];
+function hitHtml(h){if(!h)return '';let s='';
+  if(h.alert)s+='<span class="hit h2">&#128276; HOT 2 alert '+esc(h.alert.at)+(h.alert.px?' @ '+f(h.alert.px):'')+'</span>';
+  (h.gold||[]).forEach(t=>s+='<span class="hit hg">&#11088; gold '+esc(t)+'</span>');
+  (h.push||[]).forEach(t=>s+='<span class="hit hp">push '+esc(t)+'</span>');
+  return s?'<div class="hits">'+s+'</div>':''}
+function render(doc,scored,lateNote){
+  const rows=doc.rows||[],H=doc.hits||{};
   G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
+  if(!scored){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
+      +(c.length?' &mdash; '+c.map(x=>{const h=H[x.sym];return '<b>'+esc(x.sym)+'</b> '+(h.alert?esc(h.alert.at):(h.gold?'gold '+esc(h.gold[0]):'push '+esc((h.push||[''])[0])))}).join(', '):'. Updates through the day.')
+      +(lateNote?'<br><span style="color:var(--dim);font-size:13px">'+lateNote+'</span>':'')+'</div>'}
   if(scored){const r=rows.filter(x=>x.result),big=r.filter(x=>x.result.high_pct>=30).length;
     G('sum').innerHTML='<div class="note" style="border-left-color:#3fd07a"><b>How this list did on '+esc(doc.day)+':</b> '+big+' of '+r.length
       +' traded <b>30%+</b> above their previous close at some point that day. The rest did not, and some dropped. Members got this list at 4:00 AM that morning.</div>'}
@@ -75,27 +88,33 @@ function render(doc,scored){
   G('grid').innerHTML=rows.map(x=>{const z=ZONE[x.zone]||['',''];let res='';
     if(scored&&x.result){const h=x.result.high_pct,c=x.result.close_pct;const cls=h>=30?'up':(c<0?'dn':'fl');
       res='<div class="res '+cls+'">that day: high '+(h>=0?'+':'')+h+'% &middot; close '+(c>=0?'+':'')+c+'%</div>'}
-    return '<div class="card"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
+    return '<div class="card'+(H[x.sym]?' caught':'')+'"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
       +(x.days_ago==0?'ended the day before':'ended '+x.days_ago+' day'+(x.days_ago==1?'':'s')+' before')+'</span></div>'+svg(x)
       +'<div class="facts"><span>run <b>'+f(x.run_from)+' &rarr; '+f(x.run_to)+'</b></span><span>close <b>'+f(x.close)+'</b></span><span>prev high <b style="color:#6eafeb">'+f(x.yhigh)+'</b></span></div>'
-      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+res+'</div>'}).join('')}
+      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+hitHtml(H[x.sym])+res+'</div>'}).join('')}
+function yesterday(doc){if(!doc||!doc.rows)return;const r=doc.rows.filter(x=>x.result).sort((a,b)=>b.result.high_pct-a.result.high_pct);
+  const big=r.filter(x=>x.result.high_pct>=30).length;
+  G('ysec').innerHTML='<h2 style="margin:34px 0 6px">How yesterday&rsquo;s list did ('+esc(doc.day)+')</h2><p class="lead">'+big+' of '+r.length+' traded 30%+ above their previous close at some point that day. Every name is shown, winners and losers.</p>'
+   +'<div style="overflow-x:auto"><table class="yt"><tr><th>stock</th><th>run before</th><th>that day&rsquo;s high</th><th>that day&rsquo;s close</th></tr>'
+   +r.map(x=>'<tr><td><b>'+esc(x.sym)+'</b></td><td>+'+x.run_pct+'%</td><td style="color:'+(x.result.high_pct>=30?'#4ade80':'#c9d1d9')+'">'+(x.result.high_pct>=0?'+':'')+x.result.high_pct+'%</td><td style="color:'+(x.result.close_pct<0?'#ff8a8a':'#c9d1d9')+'">'+(x.result.close_pct>=0?'+':'')+x.result.close_pct+'%</td></tr>').join('')+'</table></div>'}
 </script>
 <div id="gate"><div class="box">
  <h2>Recent <span style="color:#ff3df0">Runners</span></h2>
- <p>See yesterday&rsquo;s watch list and how every name on it did, free. Enter your email to open it.</p>
+ <p>Today&rsquo;s watch list of stocks that just ran, free every trading day at 4:00 AM ET. Enter your email to open it.</p>
  <input id="em" type="email" placeholder="you@example.com" autocomplete="email">
  <label><input id="ok" type="checkbox" checked> Email me scanner news and offers (you can unsubscribe any time)</label>
  <button class="go" id="send">Open the list</button>
  <div class="msg" id="gmsg"></div>
- <p style="font-size:12px;margin-top:14px">Already a member? <a href="../live/runners.html">Today&rsquo;s list is here</a>.<br>We never sell your email. By continuing you agree to the <a href="../terms.html">Terms</a>. Not financial advice.</p>
+ <p style="font-size:12px;margin-top:14px">Already a member? <a href="../live/runners.html">Open it here</a> (alerts show live).<br>We never sell your email. By continuing you agree to the <a href="../terms.html">Terms</a>. Not financial advice.</p>
 </div></div>
 <script>
 const SB="https://bbfjmqvklilpqkxwlzib.supabase.co",KEY="sb_publishable_b1GOHTUJgD6xgfVYT0nSeQ_0tySTlos";
 async function load(){
   try{const r=await fetch(SB+'/rest/v1/free_board?id=eq.2&select=data,updated_at',{headers:{apikey:KEY,Authorization:'Bearer '+KEY},cache:'no-store'});
     const j=await r.json();const row=j&&j[0];
-    if(!row||!row.data||!row.data.rows){G('grid').innerHTML='<div class="empty">Yesterday&rsquo;s list is not ready yet. Check back after 4:00 AM ET.</div>';return}
-    render(row.data,true)}catch(e){G('grid').innerHTML='<div class="empty">Could not load the list. Please refresh.</div>'}}
+    const T=row&&row.data&&(row.data.today||(row.data.rows?row.data:null));
+    if(!T){G('grid').innerHTML='<div class="empty">Today&rsquo;s list is not ready yet. Check back after 4:00 AM ET.</div>';return}
+    render(T,false,'Free view: scanner alerts show here 15 minutes after they happen. Members get them live, with bells.');yesterday(row.data.yesterday)}catch(e){G('grid').innerHTML='<div class="empty">Could not load the list. Please refresh.</div>'}}
 const EMRE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 let ok=false;try{ok=localStorage.getItem('h2_free_ok')==='1'||localStorage.getItem('h2_runners_ok')==='1'}catch(e){}
 if(ok){load()}else{G('gate').style.display='flex'}
