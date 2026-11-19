@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recent Runners</title><meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f15;--panel:#121923;--line:#223042;--txt:#e7edf5;--dim:#8a97a8;--hot:#ff3df0}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 Inter,Segoe UI,Arial,sans-serif}
+a{color:#7cc4f5}
+header{border-bottom:1px solid var(--line)}.nav{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-weight:800;font-size:18px;text-decoration:none;color:var(--txt)}.logo b{color:var(--hot)}
+.nav a.l{color:var(--dim);text-decoration:none;font-weight:600;font-size:14px;margin-left:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+h1{font-size:clamp(26px,4vw,38px);margin:26px 0 4px}h1 b{color:var(--hot)}
+.lead{color:var(--dim);margin:0 0 6px;max-width:760px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--dim)}.chip b{color:var(--txt)}
+.key{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--dim);margin:0 0 16px}
+.key i{display:inline-block;width:20px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 12px 10px}
+.hd{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}.sym{font-weight:800;font-size:19px}
+.run{color:#3fd07a;font-weight:800}.ago{color:var(--dim);font-size:13px;margin-left:auto}
+.mini{width:100%;height:auto;display:block;background:#0d131b;border-radius:8px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--dim);margin-top:8px}.facts b{color:var(--txt)}
+.zone{font-size:12.5px;margin-top:4px}
+.res{margin-top:8px;font-weight:800;font-size:14px;padding:5px 9px;border-radius:7px;display:inline-block}
+.note{background:var(--panel);border:1px solid var(--line);border-left:4px solid #ffd34d;border-radius:10px;padding:12px 14px;color:#c9d1d9;margin:0 0 18px}
+.up{background:#0f2e1c;color:#4ade80}.dn{background:#3b0d12;color:#ff8a8a}.fl{background:#1d2633;color:#c9d1d9}
+.empty{color:var(--dim);padding:30px 0}
+#gate{position:fixed;inset:0;background:rgba(7,10,14,.96);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#gate .box{max-width:420px;width:100%;background:#121923;border:1px solid #223042;border-radius:14px;padding:22px}
+#gate h2{margin:0 0 6px;font-size:22px}#gate p{color:#c9d1d9;margin:0 0 12px;font-size:14.5px}
+#gate input[type=email]{width:100%;padding:11px;border-radius:8px;border:1px solid #262b35;background:#0f1115;color:#e6e9ef;font-size:15px}
+#gate .go{margin-top:12px;width:100%;padding:12px;border:0;border-radius:8px;background:#ff3df0;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+#gate label{display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13px;color:#c9d1d9;cursor:pointer}
+#gate label input{width:17px;height:17px;margin:1px 0 0;flex:none}
+#gate .msg{margin-top:10px;color:#f5c542;font-size:13px;min-height:18px}
+.unl{background:#ff3df0;color:#fff!important;text-decoration:none;font-weight:800;padding:7px 14px;border-radius:8px;white-space:nowrap;font-size:14px}
+#riskbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,15,21,.94);border-top:1px solid var(--line);color:var(--dim);font-size:12px;text-align:center;padding:4px 10px}
+body{padding-bottom:30px}
+</style></head><body>
+<header><div class="nav"><a class="logo" href="../index.html">HOT 2 <b>SCANNER</b></a><div><a class="l" href="./">Live scanner</a><a class="l" href="../guide.html">Guide</a></div></div></header>
+<main class="wrap">
+<h1>Recent <b>Runners</b></h1>
+<p class="lead">Stocks that ran <b>+100% or more on the daily chart in the last 10 trading days</b>. Stocks that just ran are the ones most likely to run again, so these are the names to keep an eye on.</p>
+<div class="meta" id="meta"></div>
+<div class="note"><b>Set your expectations.</b> In our history test about <b>1 in 10</b> of these names traded 30%+ above the previous close the next day, against about 1 in 100 for an average stock. Most of them don&rsquo;t, and some drop hard. This is a list to watch, not a list to buy. A new list is made every trading day at 4:00 AM ET.</div>
+<div class="key"><span><i style="color:#9aa0a6"></i>top of the run</span><span><i style="color:#ffe600"></i>25% back</span><span><i style="color:#ff3b3b"></i>50% back (red line)</span><span><i style="color:#6eafeb;border-top-style:dashed"></i>previous day's high</span><span>last 30 daily candles</span></div>
+<div id="sum"></div>
+<div class="grid" id="grid"><div class="empty">Loading...</div></div>
+</main>
+<div id="riskbar">Trading is risky and you can lose money. Not financial advice. For information and education only.</div>
+<script>
+const G=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=v=>Number(v).toPrecision(4).replace(/\.?0+$/,'');
+function svg(x){const C=x.candles||[];const W=300,H=130,P=6;
+  let lo=Math.min(x.run_from,...C.map(c=>c[3])),hi=Math.max(x.run_to,...C.map(c=>c[2]));if(hi<=lo)hi=lo*1.01;
+  const Y=v=>P+(H-2*P)*(1-(v-lo)/(hi-lo)),bw=(W-2*P)/Math.max(C.length,1);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" class="mini" role="img" aria-label="daily chart">';
+  [[x.run_to,'#9aa0a6',''],[x.yellow,'#ffe600',''],[x.red,'#ff3b3b',''],[x.yhigh,'#6eafeb','5 4']].forEach(([v,c,d])=>{
+    s+='<line x1="'+P+'" x2="'+(W-P)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c+'" stroke-width="1.4"'+(d?' stroke-dasharray="'+d+'"':'')+'/>'});
+  C.forEach((c,i)=>{const xx=P+i*bw+bw/2,col=c[4]>=c[1]?'#22c55e':'#ef4444',y1=Y(Math.max(c[1],c[4])),y2=Y(Math.min(c[1],c[4]));
+    s+='<line x1="'+xx.toFixed(1)+'" x2="'+xx.toFixed(1)+'" y1="'+Y(c[2]).toFixed(1)+'" y2="'+Y(c[3]).toFixed(1)+'" stroke="'+col+'"/>'
+      +'<rect x="'+(xx-bw*.35).toFixed(1)+'" y="'+y1.toFixed(1)+'" width="'+(bw*.7).toFixed(1)+'" height="'+Math.max(1,y2-y1).toFixed(1)+'" fill="'+col+'"/>'});
+  return s+'</svg>'}
+const ZONE={'top':['near the top','#9aa0a6'],'yellow-red':['between yellow and red','#ffe600'],'under-red':['under the red line','#ff6b6b']};
+function render(doc,scored){
+  const rows=doc.rows||[];
+  G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
+  if(scored){const r=rows.filter(x=>x.result),big=r.filter(x=>x.result.high_pct>=30).length;
+    G('sum').innerHTML='<div class="note" style="border-left-color:#3fd07a"><b>How this list did on '+esc(doc.day)+':</b> '+big+' of '+r.length
+      +' traded <b>30%+</b> above their previous close at some point that day. The rest did not, and some dropped. Members got this list at 4:00 AM that morning.</div>'}
+  if(!rows.length){G('grid').innerHTML='<div class="empty">No stock made the list this morning.</div>';return}
+  G('grid').innerHTML=rows.map(x=>{const z=ZONE[x.zone]||['',''];let res='';
+    if(scored&&x.result){const h=x.result.high_pct,c=x.result.close_pct;const cls=h>=30?'up':(c<0?'dn':'fl');
+      res='<div class="res '+cls+'">that day: high '+(h>=0?'+':'')+h+'% &middot; close '+(c>=0?'+':'')+c+'%</div>'}
+    return '<div class="card"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
+      +(x.days_ago==0?'ended the day before':'ended '+x.days_ago+' day'+(x.days_ago==1?'':'s')+' before')+'</span></div>'+svg(x)
+      +'<div class="facts"><span>run <b>'+f(x.run_from)+' &rarr; '+f(x.run_to)+'</b></span><span>close <b>'+f(x.close)+'</b></span><span>prev high <b style="color:#6eafeb">'+f(x.yhigh)+'</b></span></div>'
+      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+res+'</div>'}).join('')}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+async function client(){
+  for(const st of [window.localStorage,window.sessionStorage]){
+    try{const c=window.supabase.createClient("https://bbfjmqvklilpqkxwlzib.supabase.co","sb_publishable_b1GOHTUJgD6xgfVYT0nSeQ_0tySTlos",{auth:{persistSession:true,storage:st}});
+      const {data}=await c.auth.getSession();if(data&&data.session)return c}catch(e){}}
+  return null}
+(async()=>{const sb=await client();
+  if(!sb){G('grid').innerHTML='<div class="empty">Please <a href="./">sign in on the live scanner</a> first, then come back to this page.</div>';return}
+  const {data,error}=await sb.from('board').select('data,updated_at').eq('id',2).maybeSingle();
+  if(error||!data||!data.data||!data.data.rows){G('grid').innerHTML='<div class="empty">This list is for active members. If you just joined, give it a few minutes. Questions: hot2alerts@gmail.com</div>';return}
+  render(data.data,false)})();
+</script></body></html>
