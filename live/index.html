@@ -778,4 +778,4 @@ setInterval(()=>{const h=document.getElementById('hdr');if(h)h.textContent='live
 sb.auth.getSession().then(({data})=>start(data.session));
 sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN')start(session)});
 </script>
-</body></html>
+<div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font:12px/1.4 Inter,Segoe UI,Arial,sans-serif;text-align:center;padding:4px 10px;pointer-events:none">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style></body></html>
