@@ -30,6 +30,7 @@ h1{font-size:clamp(26px,4vw,38px);margin:26px 0 4px}h1 b{color:var(--hot)}
 .hits{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hit{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px}
 .h2{background:#3a2a06;color:#ffb347}.hg{background:#ffd000;color:#3a2a05}.hp{background:#3b0d12;color:#ff8a8a}
 .card.caught{border-color:#ffb347}
+.fa{margin-top:8px;font-size:13px;background:#1b1408;border:1px solid #5a4210;color:#ffd38a;border-radius:7px;padding:5px 9px}.fa b{color:#fff}
 .yt{width:100%;border-collapse:collapse;font-size:14px}.yt td,.yt th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}.yt th{color:var(--dim);font-weight:600}
 #gate{position:fixed;inset:0;background:rgba(7,10,14,.96);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#121923;border:1px solid #223042;border-radius:14px;padding:22px}
@@ -50,6 +51,7 @@ body{padding-bottom:30px}
 <div class="meta" id="meta"></div>
 <div class="note"><b>Set your expectations.</b> In our history test about <b>1 in 10</b> of these names traded 30%+ above the previous close the next day, against about 1 in 100 for an average stock. Most of them don&rsquo;t, and some drop hard. This is a list to watch, not a list to buy. A new list is made every trading day at 4:00 AM ET.</div>
 <div class="key"><span><i style="color:#9aa0a6"></i>top of the run</span><span><i style="color:#ffe600"></i>25% back</span><span><i style="color:#ff3b3b"></i>50% back (red line)</span><span><i style="color:#6eafeb;border-top-style:dashed"></i>previous day's high</span><span>last 30 daily candles</span></div>
+<div id="fasum"></div>
 <div id="sum"></div>
 <div class="grid" id="grid"><div class="empty">Loading...</div></div>
 <div id="ysec"></div>
@@ -75,8 +77,11 @@ function hitHtml(h){if(!h)return '';let s='';
   (h.gold||[]).forEach(t=>s+='<span class="hit hg">&#11088; gold '+esc(t)+'</span>');
   (h.push||[]).forEach(t=>s+='<span class="hit hp">push '+esc(t)+'</span>');
   return s?'<div class="hits">'+s+'</div>':''}
+function faHtml(x){const a=x.first_alert;if(!a)return '';const d=String(a.day).slice(5).replace('-','/');const t=a.to_top_pct;
+  return '<div class="fa">&#128276; HOT 2 first alert <b>'+d+' '+esc(String(a.at).slice(0,5))+'</b> @ <b>'+f(a.px)+'</b> &rarr; top '+f(x.run_to)+' <b style="color:'+(t>=0?'#4ade80':'#ff8a8a')+'">('+(t>=0?'+':'')+t+'%)</b></div>'}
 function render(doc,scored,lateNote){
   const rows=doc.rows||[],H=doc.hits||{};
+  if(!scored){const fa=rows.filter(x=>x.first_alert);G('fasum').innerHTML=fa.length?'<div class="note" style="border-left-color:#ff3df0"><b>The HOT 2 scanner alerted '+fa.length+' of these '+rows.length+' on the way up.</b> Each card shows when HOT 2 first alerted it during the run, the price, and how far it went from there to the top of the run. Some alerts came near the top, and those are shown too.</div>':''}
   G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
   if(!scored){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
       +(c.length?' &mdash; '+c.map(x=>{const h=H[x.sym];return '<b>'+esc(x.sym)+'</b> '+(h.alert?esc(h.alert.at):(h.gold?'gold '+esc(h.gold[0]):'push '+esc((h.push||[''])[0])))}).join(', '):'. Updates through the day.')
@@ -91,7 +96,7 @@ function render(doc,scored,lateNote){
     return '<div class="card'+(H[x.sym]?' caught':'')+'"><div class="hd"><span class="sym">'+esc(x.sym)+'</span><span class="run">+'+x.run_pct+'% run</span><span class="ago">'
       +(x.days_ago==0?'ended the day before':'ended '+x.days_ago+' day'+(x.days_ago==1?'':'s')+' before')+'</span></div>'+svg(x)
       +'<div class="facts"><span>run <b>'+f(x.run_from)+' &rarr; '+f(x.run_to)+'</b></span><span>close <b>'+f(x.close)+'</b></span><span>prev high <b style="color:#6eafeb">'+f(x.yhigh)+'</b></span></div>'
-      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+hitHtml(H[x.sym])+res+'</div>'}).join('')}
+      +'<div class="zone" style="color:'+z[1]+'">'+z[0]+' &middot; red '+f(x.red)+' &middot; yellow '+f(x.yellow)+'</div>'+faHtml(x)+hitHtml(H[x.sym])+res+'</div>'}).join('')}
 function yesterday(doc){if(!doc||!doc.rows)return;const r=doc.rows.filter(x=>x.result).sort((a,b)=>b.result.high_pct-a.result.high_pct);
   const big=r.filter(x=>x.result.high_pct>=30).length;
   G('ysec').innerHTML='<h2 style="margin:34px 0 6px">How yesterday&rsquo;s list did ('+esc(doc.day)+')</h2><p class="lead">'+big+' of '+r.length+' traded 30%+ above their previous close at some point that day. Every name is shown, winners and losers.</p>'
