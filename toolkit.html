@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOT 2 Toolkit</title>
+<meta name="description" content="The HOT 2 thinkorswim studies: the same lines the scanner watches, on your own chart.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f15;--panel:#121923;--line:#223042;--txt:#e7edf5;--dim:#8a97a8;--hot:#ff3df0;--yel:#ffd34d;--grn:#3fd07a;--red:#ff5c5c;--cy:#1fd3ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 Inter,Segoe UI,Arial,sans-serif}
+a{color:#7cc4f5}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,15,21,.94);z-index:5}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px;gap:10px}
+.logo{font-weight:800;letter-spacing:.5px;font-size:19px;text-decoration:none;color:var(--txt)}.logo b{color:var(--hot)}
+.nav a.l{color:var(--dim);text-decoration:none;font-weight:600;font-size:14px;margin-left:14px}
+.preview{background:#3a2a06;color:#ffb347;text-align:center;font-weight:700;font-size:13px;padding:6px 10px}
+h1{font-size:clamp(28px,4.5vw,42px);margin:36px 0 6px}
+h1 b{color:var(--hot)}
+.lead{color:var(--dim);font-size:17px;margin:0 0 22px;max-width:720px}
+h2{font-size:24px;margin:44px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+.sub{color:var(--dim);margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card .n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+ background:#ffd000;color:#111;font-weight:800;font-size:14px;margin-right:8px}
+.card h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center}
+.card p{margin:0;color:#c9d1d9;font-size:14.5px}
+.card .pane{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
+.sw{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin:0 4px 0 2px}
+.sw.d{border-top-style:dashed}
+.shot{margin:0 0 26px}
+.shot img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;cursor:zoom-in;background:#000}
+.shot figcaption{color:var(--dim);font-size:14px;margin-top:8px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 54px;margin-bottom:8px;position:relative;color:#c9d1d9}
+.steps li::before{content:counter(s);position:absolute;left:14px;top:11px;width:28px;height:28px;border-radius:50%;background:#1d2a3a;color:var(--txt);font-weight:800;display:flex;align-items:center;justify-content:center}
+.steps b{color:var(--txt)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--yel);border-radius:10px;padding:12px 14px;color:#c9d1d9;font-size:14.5px}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:24px 0 40px;color:var(--dim);font-size:13px}
+footer p{margin:0 0 10px}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out;padding:12px}
+#lb img{max-width:100%;max-height:100%}
+</style>
+<style>.getbox{background:linear-gradient(135deg,#2a0d27,#121923);border:1px solid #ff3df0;border-radius:14px;padding:18px 20px;margin:18px 0 6px}.getbox h2{margin:0 0 6px;font-size:21px;border:0;padding:0}.getbox p{color:#c9d1d9;margin:0 0 12px}.unl{background:#ff3df0;color:#fff!important;text-decoration:none;font-weight:800;padding:9px 18px;border-radius:8px;display:inline-block}.lk{font:700 15px ui-monospace,Consolas,monospace;background:#0b0f15;border:1px solid #223042;border-radius:8px;padding:9px 12px;display:inline-block;margin:0 8px 8px 0;color:#fff;user-select:all}</style></head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo" href="index.html">HOT 2 <b>SCANNER</b></a>
+  <div><a class="l" href="guide.html">Guide</a><a class="l" href="#install">Install</a><a class="l" href="index.html#pricing">Join</a></div>
+</div></header>
+
+<main class="wrap">
+<h1>The HOT 2 <b>Toolkit</b></h1>
+<p class="lead">Nine thinkorswim studies that draw the same lines the scanner watches: yesterday's high, the premarket high, the consolidation box, the pullback grid, Pattern A and the volume surge. When a stock lights up on HOT 2, you open the chart and see why.</p>
+
+<div class="getbox"><h2>Included with HOT 2 membership</h2><p>Members get all 9 studies with one thinkorswim link, already set up to match the scanner, plus the live scanner, gold breaks, consolidation pushes and bells.</p><a class="unl" href="index.html#pricing">Become a member</a> <a href="live/toolkit.html" style="margin-left:12px">Already a member? Get your link</a></div>
+
+<h2>Scanner + toolkit: made for each other</h2>
+<div class="grid">
+  <div class="card"><h3>The scanner finds them</h3><p>HOT 2 watches thousands of tickers from 4:00 AM and puts you on the stocks that are actually moving, the moment they break out on real volume.</p></div>
+  <div class="card"><h3>The toolkit shows you why</h3><p>Open the chart and the same lines are already there: YHOD, the premarket high, the box, the pullback grid, Pattern A and the volume surge. What the scanner saw, you see.</p></div>
+  <div class="card"><h3>Use your own strategy</h3><p>You don't have to trade our way. Even with your own setup, the scanner puts you on the hot stocks and the lines give you clean levels to plan around.</p></div>
+</div>
+
+<h2>What's in it</h2>
+<p class="sub">Every setting is already done. Add the study, it looks like the pictures.</p>
+<div class="grid">
+  <div class="card"><h3><span class="n">1</span>HOT2_PercentFromLow</h3><p>A label at the top: how far the stock is up from the day's low and down from its high. The color shows how stretched it is: gray, yellow, orange, red, magenta.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">2</span>HOT2_DayHighLow</h3><p><span class="sw" style="color:#9aa0a6"></span>gray = top of the day, <span class="sw" style="color:#ffe600"></span>yellow = 25% back, <span class="sw" style="color:#ff2b2b"></span>red = halfway back to the day's low. Straight across the whole chart.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">3</span>HOT2_DipGrid</h3><p>A pullback grid off the last run of green candles: gray, light green, yellow, orange, red. Moves only when a green candle closes.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">4</span><span class="n">5</span>HOT2_ConsolidationBox</h3><p>(4) A white box where price tightens and goes nowhere: solid top and bottom, dashed middle. (5) <b style="color:#3fd07a">Green arrow</b> = a new coil starts. Same box the scanner's 1M / 5M BOX tags talk about.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">6</span>HOT2_YHOD_PMHOD</h3><p><span class="sw d" style="color:#6eafeb"></span>light blue = YHOD (yesterday's high), <span class="sw d" style="color:#ff00ff"></span>magenta = PMHOD (premarket high). The two lines HOT 2 alerts on.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">7</span>HOT2_VolumeNow</h3><p>"Curr | Last": this candle's volume against the one before, green when it's bigger. A bubble shows the % change.</p><span class="pane">volume pane</span></div>
+  <div class="card"><h3><span class="n">8</span>HOT2_VolumeSurge</h3><p><b>White arrow in the volume pane</b> = this candle traded 2.5x the volume of the one before. Rings an alert.</p><span class="pane">volume pane</span></div>
+  <div class="card"><h3><span class="n">9</span>HOT2_PatternA</h3><p><b>White arrow on the candles</b> = Pattern A: 2+ green candles, then a red candle that holds the halfway line of that run. <b>Big arrow</b> above the line (YHOD / premarket high), <b>small arrow</b> still under it. Shows when the red candle closes.</p><span class="pane">price chart</span></div>
+  <div class="card"><h3><span class="n">10</span>HOT2_AfterHoursHigh</h3><p><span class="sw" style="color:#ffe600"></span>yellow line = the <b>high of the last after-hours session</b> (4:00 PM to midnight). It stays on the chart through the next morning, where a stock that ran after hours often comes back to test it.</p><span class="pane">price chart</span></div>
+</div>
+
+<h2>On real charts</h2>
+<p class="sub">Real days, real candles. The yellow numbers match the study list above. Click a picture to see it full size.</p>
+<figure class="shot"><img src="tk_VNRX.png" alt="VNRX 11-13 with all HOT 2 studies labeled"><figcaption><b>VNRX, 11-13.</b> Every study on one chart. It sat in a tight box (4), a coil started (5), volume surged (8) and it broke up through the day grid (2). 5-minute on top, 1-minute below.</figcaption></figure>
+<div class="two">
+  <figure class="shot"><img src="tk_POAS.png" alt="POAS 11-12 labeled"><figcaption><b>POAS, 11-12.</b> A long box (4), then a run to the day grid's yellow line (2) with the premarket high (6) underneath.</figcaption></figure>
+  <figure class="shot"><img src="tk_GYGY.png" alt="GYGY 11-12 labeled"><figcaption><b>GYGY, 11-12.</b> A 1-minute box (4) with coil arrows (5) under the day grid (2), then the push back up.</figcaption></figure>
+</div>
+<figure class="shot"><img src="tk_GMEX.png" alt="GMEX 11-12 labeled"><figcaption><b>GMEX, 11-12: the other side.</b> Broke out of the box (4) on a big surge (8), spiked to $0.85, then gave it all back and spent the afternoon under the grid. The lines show you where it is; they don't promise it will hold.</figcaption></figure>
+
+<h2 id="install">How to install</h2>
+<div class="two">
+  <div>
+    <p class="sub"><b style="color:var(--txt)">Easiest: the share link</b></p>
+    <ol class="steps">
+      <li>Open <b>thinkorswim</b> on your computer.</li>
+      <li>Copy the <b>share link</b> from your members Toolkit page.</li>
+      <li>In thinkorswim go to <b>Setup &rarr; Open shared item</b>, paste the link, click <b>Preview</b>, then <b>Import</b>. You get a chart with all 9 studies already set up.</li>
+      <li>To use them on your other charts: <b>Studies &rarr; Edit studies</b>, find the HOT2 studies, <b>Add selected</b>.</li>
+    </ol>
+  </div>
+  <div>
+    <p class="sub"><b style="color:var(--txt)">Backup: paste the code</b></p>
+    <ol class="steps">
+      <li>In thinkorswim: <b>Studies &rarr; Edit studies &rarr; Create</b>.</li>
+      <li>Delete what's in the box and paste the code from the study's <b>.txt</b> file.</li>
+      <li>Name it (for example <b>HOT2_DayHighLow</b>) and click <b>OK</b>.</li>
+      <li>Add it to your chart. Don't change any settings, they're already done.</li>
+    </ol>
+  </div>
+</div>
+<div class="note" style="margin-top:12px"><b>Volume studies</b> (VolumeNow and VolumeSurge) go in the <b>volume pane</b> under the price chart. Everything else goes on the price chart. Same settings on 1-minute and 5-minute charts.</div>
+
+<footer>
+  <p><b>Not financial advice.</b> The HOT 2 Toolkit is for information and education only. Nothing here is a recommendation to buy or sell any security. The studies draw lines and marks on your chart; they don't predict where a stock will go. Trading low-float and premarket stocks is very risky. See the <a href="terms.html">Terms of Service</a>.</p>
+  <p><b>License.</b> The studies are for members' own personal trading. Don't copy, share, resell or pass on the code or the share links.</p>
+  <p>thinkorswim is a trademark of Charles Schwab. HOT 2 Scanner is not affiliated with or endorsed by Charles Schwab.</p>
+</footer>
+</main>
+<div id="lb"><img alt=""></div>
+<script>
+document.querySelectorAll('.shot img').forEach(function(i){i.onclick=function(){var b=document.getElementById('lb');b.querySelector('img').src=i.src;b.style.display='flex';};});
+document.getElementById('lb').onclick=function(){this.style.display='none';};
+</script>
+<div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font-size:12px;text-align:center;padding:4px 10px">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style></body>
+</html>
