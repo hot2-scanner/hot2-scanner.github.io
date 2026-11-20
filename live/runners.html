@@ -34,6 +34,9 @@ h1{font-size:clamp(26px,4vw,38px);margin:26px 0 4px}h1 b{color:var(--hot)}
 .h2{background:#3a2a06;color:#ffb347}.hg{background:#ffd000;color:#3a2a05}.hp{background:#3b0d12;color:#ff8a8a}
 .card.caught{border-color:#ffb347}
 .fa{margin-top:8px;font-size:13px;background:#1b1408;border:1px solid #5a4210;color:#ffd38a;border-radius:7px;padding:5px 9px}.fa b{color:#fff}
+.mini{cursor:zoom-in}
+@media(min-width:900px){.wrap{max-width:1240px}.nav{max-width:1240px}.lead{font-size:17px;max-width:900px}.chip,.key{font-size:14.5px}.grid{grid-template-columns:repeat(2,1fr);gap:18px}.card{padding:16px 16px 14px}.sym{font-size:25px}.run{font-size:18px}.ago{font-size:15px}.facts{font-size:16px}.fa{font-size:16px;padding:8px 12px}.hit{font-size:14px}.note{font-size:16.5px}}
+#zoom{position:fixed;inset:0;z-index:10000;background:rgba(5,8,12,.93);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}#zoom .zb{width:min(1200px,96vw)}#zoom .zh{font:800 22px Inter,Segoe UI,Arial,sans-serif;color:#fff;margin:0 0 10px}#zoom .zt{color:#8a97a8;font-size:13px;margin-top:8px}
 .yt{width:100%;border-collapse:collapse;font-size:14px}.yt td,.yt th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}.yt th{color:var(--dim);font-weight:600}
 #gate{position:fixed;inset:0;background:rgba(7,10,14,.96);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #gate .box{max-width:420px;width:100%;background:#121923;border:1px solid #223042;border-radius:14px;padding:22px}
@@ -60,6 +63,7 @@ body{padding-bottom:30px}
 
 <div class="disc"><b>Disclaimer.</b> These stocks were picked <b>because they ran</b>; most HOT 2 alerts do not turn into runs like these. Past alerts and results do not promise or predict future results. Trading stocks, especially low-float and premarket stocks, is very risky and you can lose money. HOT 2 Scanner is for information and education only and is not financial advice. Prices shown are the alert price and the run&rsquo;s closing high on the daily chart. See the <a href="../terms.html">Terms of Service</a>.</div>
 </main>
+<div id="zoom"></div>
 <div id="riskbar">Trading is risky and you can lose money. Not financial advice. For information and education only.</div>
 <script>
 const G=id=>document.getElementById(id);
@@ -108,6 +112,9 @@ function yesterday(doc){if(!doc||!doc.rows)return;const r=doc.rows.filter(x=>x.r
   G('ysec').innerHTML='<h2 style="margin:34px 0 6px">How yesterday&rsquo;s list did ('+esc(doc.day)+')</h2><p class="lead">'+big+' of '+r.length+' traded 30%+ above their previous close at some point that day. Every name is shown, winners and losers.</p>'
    +'<div style="overflow-x:auto"><table class="yt"><tr><th>stock</th><th>run before</th><th>that day&rsquo;s high</th><th>that day&rsquo;s close</th></tr>'
    +r.map(x=>'<tr><td><b>'+esc(x.sym)+'</b></td><td>+'+x.run_pct+'%</td><td style="color:'+(x.result.high_pct>=30?'#4ade80':'#c9d1d9')+'">'+(x.result.high_pct>=0?'+':'')+x.result.high_pct+'%</td><td style="color:'+(x.result.close_pct<0?'#ff8a8a':'#c9d1d9')+'">'+(x.result.close_pct>=0?'+':'')+x.result.close_pct+'%</td></tr>').join('')+'</table></div>'}
+
+document.addEventListener('click',e=>{const m=e.target.closest('.mini');const z=document.getElementById('zoom');if(m){const c=m.closest('.card');const h=c?c.querySelector('.hd').innerText.replace(/\s+/g,' '):'';const fa=c&&c.querySelector('.fa')?c.querySelector('.fa').outerHTML:'';z.innerHTML='<div class="zb"><div class="zh">'+esc(h)+'</div>'+m.outerHTML.replace('class="mini"','class="mini" style="cursor:zoom-out"')+fa+'<div class="zt">Tap anywhere to close</div></div>';z.style.display='flex';return}if(z&&e.target.closest('#zoom'))z.style.display='none'});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const z=document.getElementById('zoom');if(z)z.style.display='none'}});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
