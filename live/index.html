@@ -734,7 +734,7 @@ G('send').onclick=async()=>{const e=(G('em').value||'').trim().toLowerCase();
   G('send').disabled=true;gmsg('Sending...');
   const {error}=await sb.auth.signInWithOtp({email:e,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});
   G('send').disabled=false;
-  gmsg(error?('Could not send: '+(/not.*(found|allowed)|signups/i.test(error.message)?'that email is not a member.':error.message)):'Check your email and click the sign-in link (it can take a minute).')};
+  gmsg(error?(/not.*(found|allowed)|signups/i.test(error.message)?'Could not send: that email is not a member.':/rate|limit|too many|seconds/i.test(error.message)?'Sign-in emails are busy right now. Please try again in a few minutes.':'Could not send the sign-in email right now. Please try again in a few minutes.'):'Check your email and click the sign-in link (it can take a minute).')};
 G('out').onclick=async()=>{await sb.auth.signOut();location.reload()};
 let chan=null;
 // 11-18 (free Supabase plan): the feed now sends the screen PACKED (gzip, ~14 KB instead of ~48 KB). unpack() reads both.
