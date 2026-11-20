@@ -749,7 +749,7 @@ async function useRow(r,canPull){if(!r||!r.data)return false;let d;try{d=await u
   const at=new Date(r.updated_at);
   if(r.id===1){FULL=d;FULLV=(d&&d._v)||null;DATA=d;LAST_AT=at;return true}
   if(r.id===2&&d){if(FULLV&&d._base===FULLV){if(LAST_AT&&at<LAST_AT)return false;
-      DATA=Object.assign({},FULL,d.k||{});if(d.sent_et)DATA.sent_et=d.sent_et;LAST_AT=at;return true}
+      DATA=Object.assign({},FULL,d.k||{});if(d.p)for(const k in d.p){const b=FULL[k];DATA[k]=Object.assign({},(b&&typeof b==='object'&&!Array.isArray(b))?b:{},d.p[k])}if(d.r)for(const k in d.r){if(DATA[k]&&typeof DATA[k]==='object'){if(DATA[k]===FULL[k])DATA[k]=Object.assign({},DATA[k]);for(const s of d.r[k])delete DATA[k][s]}}if(d.sent_et)DATA.sent_et=d.sent_et;LAST_AT=at;return true}
     if(canPull&&FULLV&&d._base&&d._base>FULLV&&Date.now()-LAST_PULL>5000){LAST_PULL=Date.now();pull()}}
   return false}
 async function pull(){
@@ -775,7 +775,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795141804';
+const H2_BUILD='1795142130';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
