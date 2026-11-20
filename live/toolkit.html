@@ -133,7 +133,7 @@ document.getElementById('lb').onclick=function(){this.style.display='none';};
   if(!sb){P.innerHTML='Please <a href="./">sign in on the live scanner</a> first, then come back to this page.';return}
   const {data,error}=await sb.from('board').select('data').eq('id',3).maybeSingle();
   const link=data&&data.data&&data.data.toolkit_link;
-  if(error||!link){P.textContent='This link is for active members. If you just joined, give it a few minutes. Questions: hot2alerts@gmail.com';return}
+  if(error||!link){P.textContent='This link is for active members. If you just joined, give it a few minutes. Questions: support@hot2scanner.com';return}
   P.innerHTML='All 9 studies on one chart. In thinkorswim: <b>Setup &rarr; Open shared item</b>, paste this link, <b>Preview</b>, <b>Import</b>. For your own use only, please don&rsquo;t share it.';
   const s=document.createElement('span');s.className='lk';s.textContent=link;
   const b=document.createElement('button');b.className='unl';b.style.border='0';b.style.cursor='pointer';b.textContent='Copy link';

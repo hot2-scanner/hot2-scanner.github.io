@@ -755,7 +755,7 @@ async function start(session){
   if(!session){G('gate').style.display='flex';return}
   const ok=await pull();
   if(!ok){G('gform').style.display='none';G('gp').textContent='Signed in as '+session.user.email+', but this membership is not active.';
-    gmsg('If you just paid, give it a few minutes. Questions: email hot2alerts@gmail.com.');
+    gmsg('If you just paid, give it a few minutes. Questions: email support@hot2scanner.com.');
     G('gate').style.display='flex';G('live').style.display='block';return}
   G('gate').style.display='none';G('live').style.display='block';
   try{all();load100k();loadUnder();loadGold()}catch(e){}
