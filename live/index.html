@@ -742,12 +742,22 @@ async function unpack(d){if(!d||!d.z)return d;
   const bin=Uint8Array.from(atob(d.z),c=>c.charCodeAt(0));
   const st=new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
   return JSON.parse(await new Response(st).text())}
-let LAST_RT=0;
+let LAST_RT=0,FULL=null,FULLV=null,LAST_PULL=0;
+// 11-19 SMALL FEED: row 1 = the whole screen (about every 60 s), row 2 = only what changed since row 1 (every few s).
+// Still works with the old feed (row 1 every 2 s, no '_v' -> row 2 ignored).
+async function useRow(r,canPull){if(!r||!r.data)return false;let d;try{d=await unpack(r.data)}catch(e){return false}
+  const at=new Date(r.updated_at);
+  if(r.id===1){FULL=d;FULLV=(d&&d._v)||null;DATA=d;LAST_AT=at;return true}
+  if(r.id===2&&d){if(FULLV&&d._base===FULLV){if(LAST_AT&&at<LAST_AT)return false;
+      DATA=Object.assign({},FULL,d.k||{});if(d.sent_et)DATA.sent_et=d.sent_et;LAST_AT=at;return true}
+    if(canPull&&FULLV&&d._base&&d._base>FULLV&&Date.now()-LAST_PULL>5000){LAST_PULL=Date.now();pull()}}
+  return false}
 async function pull(){
-  const {data,error}=await sb.from('board').select('data,updated_at').eq('id',1).maybeSingle();
+  const {data,error}=await sb.from('board').select('id,data,updated_at').in('id',[1,2]).order('id');
   if(error){gmsg('Error: '+error.message);return false}
-  if(!data){return false}
-  try{DATA=await unpack(data.data)}catch(e){return false}LAST_AT=new Date(data.updated_at);return true}
+  const r1=(data||[]).find(r=>r.id===1),r2=(data||[]).find(r=>r.id===2);
+  if(!r1||!(await useRow(r1,false)))return false;
+  if(r2)await useRow(r2,false);return true}
 function tick(){if(!LAST_AT)return;const age=(Date.now()-LAST_AT.getTime())/1000;
   const s=G('live');s.classList.toggle('stale',age>90);
   G('lt').textContent=age>90?('scanner offline - last update '+LAST_AT.toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'):'live'}
@@ -760,12 +770,12 @@ async function start(session){
   G('gate').style.display='none';G('live').style.display='block';
   try{all();load100k();loadUnder();loadGold()}catch(e){}
   if(!chan){chan=sb.channel('board').on('postgres_changes',{event:'UPDATE',schema:'public',table:'board'},p=>{
-     if(p&&p.new&&p.new.data&&p.new.id===1){const at=new Date(p.new.updated_at);unpack(p.new.data).then(d=>{DATA=d;LAST_AT=at;LAST_RT=Date.now()}).catch(()=>{})}}).subscribe()}
+     const r=p&&p.new;if(r&&r.data&&(r.id===1||r.id===2)){LAST_RT=Date.now();useRow(r,true)}}).subscribe()}
   // backup pull ONLY when the live connection has been quiet for 20 s (it used to download the whole screen every 15 s on top)
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795100167';
+const H2_BUILD='1795141804';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
