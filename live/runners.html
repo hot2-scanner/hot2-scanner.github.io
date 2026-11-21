@@ -90,7 +90,7 @@ function faHtml(x){const a=x.first_alert;if(!a)return '';const d=String(a.day).s
 function render(doc,scored,lateNote){
   let rows=doc.rows||[];const H={};
   const all=rows.length;
-  if(!scored){rows=rows.filter(x=>x.first_alert).sort((a,b)=>b.first_alert.to_top_pct-a.first_alert.to_top_pct);const nAl=rows.length;rows=rows.slice(0,10);
+  if(!scored){rows=rows.filter(x=>x.first_alert&&x.first_alert.to_top_pct>=10).sort((a,b)=>b.first_alert.to_top_pct-a.first_alert.to_top_pct);const nAl=rows.length;rows=rows.slice(0,10);
     G('fasum').innerHTML='<div class="note" style="border-left-color:#ff3df0"><b>HOT 2 alerted '+nAl+' of the '+all+' stocks that ran +100% in the last 10 trading days.</b> Here are the top 10, with when the scanner first alerted each one on the way up.</div>'}
   G('meta').innerHTML='<span class="chip">list for <b>'+esc(doc.day)+'</b></span><span class="chip">made <b>'+esc(doc.made||'')+'</b></span><span class="chip"><b>'+rows.length+'</b> names</span><span class="chip">price <b>$0.10 &ndash; $10</b></span>';
   if(false){const c=rows.filter(x=>H[x.sym]);G('sum').innerHTML='<div class="note" style="border-left-color:#ffb347"><b>Caught by the HOT 2 scanner today: '+c.length+' of '+rows.length+'</b>'
