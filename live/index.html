@@ -158,9 +158,13 @@ td.sym .pmW{border:1px solid #6b5a10;color:#ffd000}
 #ringbar.gold.live{animation:rbflash 1.4s infinite}#ringbar.push.live{animation:rbflashr 1.4s infinite}
 #ringbar .rbt{font-size:15px;font-weight:800;color:#fff}#ringbar .rbw{font-size:12px;color:#e6d6a8}
 #ringlist{font-size:11px;color:#8a93a3;margin:0 0 6px}
+#ringalso{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:5px 0 2px 18px;padding:4px 10px;border-left:2px solid #3a4150}
+#ringalso .lbl{font-size:11px;color:#8a93a3}
+.achip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;cursor:pointer;border:1px solid}
+.achip.push{background:#3b0d12;border-color:#ff3b3b;color:#ff8a8a}.achip.under{background:#0d2a30;border-color:#1fd3ea;color:#7fe6f3}
 .rbflashrow{outline:3px solid #fff!important}
 </style>
-<div id="ringbar" onclick="ringJump()"></div><div id="ringlist"></div>
+<div id="ringbar" onclick="ringJump()"></div><div id="ringalso"></div><div id="ringlist"></div>
 <div class="volbar" id="volnote"></div>
 <div class="k100" id="k100"></div>
 <div id="goldbar" style="display:none;border:3px solid #ffd000;color:#fff;font-weight:800;font-size:16px;padding:6px 10px;border-radius:7px;margin:2px 0 8px;animation:g1blink 1s ease-in-out infinite"></div>
@@ -567,7 +571,11 @@ function ringPaint(){
       +'<div class="rbw">'+(r.kind==='push'?'Push sound':(r.kind==='under'?'Blue bell':'Gold chime'))+' &middot; '+r.why
       +(r.vol?' &middot; '+big(r.vol)+' this minute':'')+(r.px?' &middot; $'+(r.px<1?(+r.px).toFixed(4):(+r.px).toFixed(2)):'')+'</div></div>'
       +'<span class="dim" style="font-size:11px">click = jump to it</span>'}
-  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.filter(o=>o!==r).slice(0,6).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':(o.kind==='under'?' under':' gold'))+'</span>').join(''):'';
+  // 11-23 his mock-up OK: gold keeps the big bar; red/blue that rang AFTER it show in a small "Also ringing" strip under it
+  const al=$('ringalso'),also=(r&&r.kind==='gold')?RANG.filter(o=>o!==r&&o.kind!=='gold'&&o.t>r.t&&Date.now()-o.t<RING_MS).slice(0,4):[];
+  if(al){if(!also.length){al.style.display='none';al.innerHTML=''}else{al.style.display='flex';
+    al.innerHTML='<span class="lbl">Also ringing</span>'+also.map(o=>'<span class="achip '+o.kind+'" data-s="'+o.sym+'" onclick="ringJumpSym(this.dataset.s)"><span class="rbell ringing" style="font-size:14px">&#128276;</span>'+o.sym+' '+o.at+' '+(o.kind==='push'?'push':'under')+'</span>').join('')}}
+  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.filter(o=>o!==r&&also.indexOf(o)<0).slice(0,6).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':(o.kind==='under'?' under':' gold'))+'</span>').join(''):'';
   document.querySelectorAll('.arow[data-s] .aline .sym, td.sym').forEach(el=>{
     const s=el.closest('.arow')?el.closest('.arow').dataset.s:el.textContent.trim().split(/\s/)[0];
     const isTd=el.tagName==='TD';
@@ -576,8 +584,9 @@ function ringPaint(){
     if(!h){if(sp)sp.remove();return}
     if(!sp){sp=document.createElement('span');sp.className='rbwrap';if(isTd)el.appendChild(sp);else el.insertAdjacentElement('afterend',sp)}
     if(sp.innerHTML!==h)sp.innerHTML=h})}
-function ringJump(){const r=topBell();if(!r)return;
-  const el=document.querySelector('.arow[data-s="'+r.sym+'"]')||[...document.querySelectorAll('td.sym')].find(t=>t.textContent.trim().startsWith(r.sym));
+function ringJump(){const r=topBell();if(!r)return;ringJumpSym(r.sym)}
+function ringJumpSym(sym){
+  const el=document.querySelector('.arow[data-s="'+sym+'"]')||[...document.querySelectorAll('td.sym')].find(t=>t.textContent.trim().startsWith(sym));
   if(!el)return;const row=el.closest('tr')||el;row.scrollIntoView({behavior:'smooth',block:'center'});
   row.classList.add('rbflashrow');setTimeout(()=>row.classList.remove('rbflashrow'),2500)}
 // UNDER THE LINES (2026-11-14) -- reads :8792, hides any name already in the HOT 2 rows above
@@ -790,7 +799,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795446581';
+const H2_BUILD='1795447959';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
