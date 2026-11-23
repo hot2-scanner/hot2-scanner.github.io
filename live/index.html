@@ -551,8 +551,13 @@ function underSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')a
   const t0=ac.currentTime+0.02;[[1319,0],[1047,0.11],[880,0.22]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();
     o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(0.4,t0+d+0.006);
     g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.35);o.connect(g);g.connect(ac.destination);o.start(t0+d);o.stop(t0+d+0.4)})}
+// 11-23 his call: GOLD takes precedence, all day -- a newer red/blue bell can't knock a gold bell off the top bar
+// for 60 s ("enough not to get knocked off right away"). They still ring and still go in Earlier bells.
+const GOLD_HOLD_MS=60000;
+function topBell(){const n=RANG[0];if(!n||n.kind==='gold')return n;
+  const g=RANG.find(o=>o.kind==='gold');return (g&&Date.now()-g.t<GOLD_HOLD_MS)?g:n}
 function ringPaint(){
-  const b=$('ringbar');if(!b)return;const r=RANG[0];
+  const b=$('ringbar');if(!b)return;const r=topBell();
   if(!r){b.className='idle';b.style.display='flex';   // 11-18: always visible, so you can see the bell bar is there
     b.innerHTML='<span class="rbell" style="font-size:20px;color:#8a93a3">&#128276;</span><div style="flex:1"><div class="rbt" style="color:#c9d1dd;font-size:13px">No bell yet since you opened this page</div>'
       +'<div class="rbw" style="color:#8a93a3">When one rings, the stock that rang shows here, and its bell shakes on its card</div></div>'}else{const live=Date.now()-r.t<RING_MS;
@@ -562,7 +567,7 @@ function ringPaint(){
       +'<div class="rbw">'+(r.kind==='push'?'Push sound':(r.kind==='under'?'Blue bell':'Gold chime'))+' &middot; '+r.why
       +(r.vol?' &middot; '+big(r.vol)+' this minute':'')+(r.px?' &middot; $'+(r.px<1?(+r.px).toFixed(4):(+r.px).toFixed(2)):'')+'</div></div>'
       +'<span class="dim" style="font-size:11px">click = jump to it</span>'}
-  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.slice(1,7).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':(o.kind==='under'?' under':' gold'))+'</span>').join(''):'';
+  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.filter(o=>o!==r).slice(0,6).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':(o.kind==='under'?' under':' gold'))+'</span>').join(''):'';
   document.querySelectorAll('.arow[data-s] .aline .sym, td.sym').forEach(el=>{
     const s=el.closest('.arow')?el.closest('.arow').dataset.s:el.textContent.trim().split(/\s/)[0];
     const isTd=el.tagName==='TD';
@@ -571,7 +576,7 @@ function ringPaint(){
     if(!h){if(sp)sp.remove();return}
     if(!sp){sp=document.createElement('span');sp.className='rbwrap';if(isTd)el.appendChild(sp);else el.insertAdjacentElement('afterend',sp)}
     if(sp.innerHTML!==h)sp.innerHTML=h})}
-function ringJump(){const r=RANG[0];if(!r)return;
+function ringJump(){const r=topBell();if(!r)return;
   const el=document.querySelector('.arow[data-s="'+r.sym+'"]')||[...document.querySelectorAll('td.sym')].find(t=>t.textContent.trim().startsWith(r.sym));
   if(!el)return;const row=el.closest('tr')||el;row.scrollIntoView({behavior:'smooth',block:'center'});
   row.classList.add('rbflashrow');setTimeout(()=>row.classList.remove('rbflashrow'),2500)}
@@ -785,7 +790,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795443639';
+const H2_BUILD='1795446581';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
