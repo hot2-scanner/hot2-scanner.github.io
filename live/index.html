@@ -268,7 +268,7 @@ function applyPmh(){
     r.classList.toggle('pmhabove',!!(x&&x[3]));const c=r.querySelector('.apmhx');if(c)c.innerHTML=pmhChip(s)});
   document.querySelectorAll('td.v1[data-vsym]').forEach(td=>{const tr=td.closest('tr');if(!tr)return;const s=td.dataset.vsym,x=PMHMAP[s];
     tr.classList.toggle('pmhabove',!!(x&&x[3]));const sc=tr.querySelector('td.sym');if(!sc)return;
-    let t=sc.querySelector('.pmT');if(x&&x[3]){if(!t){t=document.createElement('span');t.className='pmT';sc.appendChild(t)}t.textContent=GLINE=='DAY HIGH'?'\u25B2HOD':'\u25B2PMH'}else if(t)t.remove()});}
+    let t=sc.querySelector('.pmT');if(x&&x[3]){if(!t){t=document.createElement('span');t.className='pmT';sc.appendChild(t)}t.textContent=GLINE=='DAY HIGH'?'\u25B2HOD':(GLINE=='YHOD'?'\u25B2YHOD':'\u25B2PMH')}else if(t)t.remove()});}
 async function loadGold(){let j;
   const syms=[...new Set([...document.querySelectorAll('[data-s],[data-vsym]')].map(e=>e.dataset.s||e.dataset.vsym))].filter(Boolean);
   try{j=await (await fetch('/pmh_gold?syms='+encodeURIComponent(syms.join(',')),{cache:'no-store'})).json()}catch(e){return}
@@ -276,7 +276,7 @@ async function loadGold(){let j;
   const g=j.gold||[];GOLDSET={};g.forEach(o=>GOLDSET[o.sym]=o);
   const b=$('goldbar');
   if(g.length){b.style.display='block';b.innerHTML=g.map(o=>'&#11088; '+GLINE+' BREAK + 100K: <b>'+o.sym+'</b> '+(+o.px).toPrecision(4)
-     +' &nbsp;broke '+(GLINE=='DAY HIGH'?"today's high (9:30-4:00) ":'the premarket high ')+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
+     +' &nbsp;broke '+(GLINE=='DAY HIGH'?"today's high (9:30-4:00) ":(GLINE=='YHOD'?"yesterday's high (YHOD) ":'the premarket high '))+(+o.level).toPrecision(4)+' on '+big(o.vol)+' &nbsp;<span style="opacity:.75">since '+o.since+'</span>').join('<br>')}
   else b.style.display='none';
   document.querySelectorAll('.arow[data-s]').forEach(r=>r.classList.toggle('pmhgold',!!GOLDSET[r.dataset.s]));
   bellCheck();}
@@ -305,7 +305,7 @@ function pmhStep(s){const x=VOL[s];const L=PMHLV[s]||(x&&x.pmh);
   if(x.px<L*0.995){PMHARM[s]=true;PMHG[s]=false;return}
   if(x.px<=L){PMHG[s]=false;return}                          // within 0.5% under the line: no change to the arm
   if(isHot(s)&&(PMHG[s]||PMHARM[s]!==false)){PMHG[s]=true;PMHARM[s]=false;return}
-  PMHG[s]=false;PMHARM[s]=false}
+  PMHG[s]=false}   // 11-23: a quiet candle above the line keeps it armed (his rule)
 function checkBig(best,bv){
   const now=etMin(); let ch=false;
   document.querySelectorAll('.arow').forEach(r=>{
@@ -799,7 +799,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795447959';
+const H2_BUILD='1795458018';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
