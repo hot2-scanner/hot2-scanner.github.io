@@ -149,6 +149,9 @@ td.sym .pmW{border:1px solid #6b5a10;color:#ffd000}
 .rbtag{display:inline-block;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:800;margin-right:4px}
 .rbtag.gold{background:#ffc83d;color:#3a2a05}.rbtag.push{background:#ff3b3b;color:#2a0507}
 .rbtag.old.gold{background:#3a2a05;color:#ffd666}.rbtag.old.push{background:#3b0d12;color:#ff8a8a}
+.rbtag.under{background:#1fd3ea;color:#04262c}.rbtag.old.under{background:#0d2a30;color:#7fe6f3}
+#ringbar.under{border-color:#1fd3ea;background:#0d2a30}#ringbar.under.live{animation:rbflashb 1.4s infinite}
+@keyframes rbflashb{0%,100%{background:#0d2a30}50%{background:#11505a}}
 #ringbar{display:none;align-items:center;gap:10px;border:2px solid #ffc83d;border-radius:8px;padding:6px 10px;margin:2px 0 4px;cursor:pointer}
 #ringbar.idle{border:1px dashed #3a4150;background:#151922;cursor:default}
 #ringbar.gold{border-color:#ffc83d;background:#3a2a05}#ringbar.push{border-color:#ff3b3b;background:#3b0d12}
@@ -533,26 +536,33 @@ async function loadBells(){let j;try{j=await (await fetch('/bells',{cache:'no-st
   RANG=j.bells.map(o=>({sym:o.sym,kind:o.kind,why:o.why,at:o.at,t:o.ep*1000,px:o.px,vol:o.vol,key:o.key}));
   const keys=new Set(RANG.map(r=>r.key));
   if(BSEEN===null){BSEEN=keys;ringPaint();return}
-  let g=false,p=false;RANG.forEach(r=>{if(!BSEEN.has(r.key)){BSEEN.add(r.key);if(Date.now()-r.t<180000){if(r.kind==='push')p=true;else g=true}}});
-  if(BELL_ON){if(g)bellSound();else if(p)pushSound()}
+  let g=false,p=false,u=false;RANG.forEach(r=>{if(!BSEEN.has(r.key)){BSEEN.add(r.key);if(Date.now()-r.t<180000){if(r.kind==='push')p=true;else if(r.kind==='under')u=true;else g=true}}});
+  if(BELL_ON){if(g||u)bellSound();else if(p)pushSound()}   // 11-23 his call: blue = same regular bell, just blue
   ringPaint()}
 function ringLast(s){for(const r of RANG)if(r.sym===s)return r;return null}
 function ringHtml(s){const r=ringLast(s);if(!r)return '';const live=Date.now()-r.t<RING_MS;
-  const col=r.kind==='push'?'#ff6b6b':'#ffc83d';
+  const col=bellCol(r.kind);
   return '<span class="rbell'+(live?' ringing':'')+'" style="color:'+col+'">&#128276;</span>'
-    +'<span class="rbtag '+r.kind+(live?'':' old')+'">RANG '+r.at.slice(0,5)+(r.kind==='push'?' PUSH':'')+'</span>'}
+    +'<span class="rbtag '+r.kind+(live?'':' old')+'">RANG '+r.at.slice(0,5)+(r.kind==='push'?' PUSH':(r.kind==='under'?' UNDER':''))+'</span>'}
+// 11-23 his ask "a bell and blue, like the gold and the red" (missed SOAR + GMEX running under the line):
+// BLUE bell = 100k/min under YHOD (UNDER THE LINES). Own sound: three quick high taps going down (E6 C6 A5).
+function bellCol(k){return k==='push'?'#ff6b6b':(k==='under'?'#1fd3ea':'#ffc83d')}
+function underSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
+  const t0=ac.currentTime+0.02;[[1319,0],[1047,0.11],[880,0.22]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();
+    o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(0.4,t0+d+0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.35);o.connect(g);g.connect(ac.destination);o.start(t0+d);o.stop(t0+d+0.4)})}
 function ringPaint(){
   const b=$('ringbar');if(!b)return;const r=RANG[0];
   if(!r){b.className='idle';b.style.display='flex';   // 11-18: always visible, so you can see the bell bar is there
     b.innerHTML='<span class="rbell" style="font-size:20px;color:#8a93a3">&#128276;</span><div style="flex:1"><div class="rbt" style="color:#c9d1dd;font-size:13px">No bell yet since you opened this page</div>'
       +'<div class="rbw" style="color:#8a93a3">When one rings, the stock that rang shows here, and its bell shakes on its card</div></div>'}else{const live=Date.now()-r.t<RING_MS;
     b.className=r.kind+(live?' live':'');b.style.display='flex';
-    b.innerHTML='<span class="rbell'+(live?' ringing':'')+'" style="font-size:24px;color:'+(r.kind==='push'?'#ff6b6b':'#ffc83d')+'">&#128276;</span>'
+    b.innerHTML='<span class="rbell'+(live?' ringing':'')+'" style="font-size:24px;color:'+bellCol(r.kind)+'">&#128276;</span>'
       +'<div style="flex:1"><div class="rbt">'+r.sym+' rang &middot; '+r.at+'</div>'
-      +'<div class="rbw">'+(r.kind==='push'?'Push sound':'Gold chime')+' &middot; '+r.why
+      +'<div class="rbw">'+(r.kind==='push'?'Push sound':(r.kind==='under'?'Blue bell':'Gold chime'))+' &middot; '+r.why
       +(r.vol?' &middot; '+big(r.vol)+' this minute':'')+(r.px?' &middot; $'+(r.px<1?(+r.px).toFixed(4):(+r.px).toFixed(2)):'')+'</div></div>'
       +'<span class="dim" style="font-size:11px">click = jump to it</span>'}
-  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.slice(1,7).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':' gold')+'</span>').join(''):'';
+  const l=$('ringlist');if(l)l.innerHTML=RANG.length>1?'Earlier bells: '+RANG.slice(1,7).map(o=>'<span class="rbtag old '+o.kind+'">&#128276; '+o.sym+' '+o.at.slice(0,5)+(o.kind==='push'?' push':(o.kind==='under'?' under':' gold'))+'</span>').join(''):'';
   document.querySelectorAll('.arow[data-s] .aline .sym, td.sym').forEach(el=>{
     const s=el.closest('.arow')?el.closest('.arow').dataset.s:el.textContent.trim().split(/\s/)[0];
     const isTd=el.tagName==='TD';
@@ -775,7 +785,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795142130';
+const H2_BUILD='1795443639';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
