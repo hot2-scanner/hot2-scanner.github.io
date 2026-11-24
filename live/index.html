@@ -103,6 +103,10 @@ tr.k100row td{box-shadow:inset 0 0 0 9999px rgba(255,48,48,.22)!important}
    Red (the push out of the box) wins over it. */
 .arow.inbox{border:2px dashed #cfd6e0!important;background:#181c24}
 .ainbox{background:#2a2f3a;color:#e6e9ef;border:1px dashed #cfd6e0;font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;white-space:nowrap}
+/* 11-24 OWNER OK ("lets do it"): PRESSING TOP = sitting in its 1-min box, last close in the top 20%, tagged the top 2+ times in
+   6 candles, + higher lows or a 100k candle. Box breaks up within 3 min ~2x as often (study 11-18..23). Heads-up, not a buy. */
+@keyframes ptblink{0%,100%{background:#5a0f18;border-color:#ff3b3b;color:#fff}50%{background:#1e0a0d;border-color:#7a1d24;color:#ff8a8a}}
+.ptop{display:inline-block;border:2px solid #ff3b3b;font-weight:800;font-size:11px;padding:1px 7px;border-radius:4px;white-space:nowrap;margin:0 4px;animation:ptblink 1s ease-in-out infinite}
 tr.inboxtr td{box-shadow:inset 0 0 0 9999px rgba(207,214,224,.08)} tr.inboxtr td:first-child{border-left:3px dashed #cfd6e0}
 .arow.k100row .aline::after,tr.k100row td:nth-child(3)::after{content:'CONSOLIDATION PUSH';background:#ff3030;color:#fff;
  font-weight:800;font-size:10.5px;padding:1px 6px;border-radius:4px;margin-left:6px;white-space:nowrap}
@@ -438,7 +442,8 @@ async function loadAlerts(){
         +'<span class="afirst">1ST ALERT + 100K</span>'
         +'<span class="apmh">PM HIGH BREAK + 100K</span>'
         +'<span class="apmhx">'+pmhChip(k.sym)+'</span>'
-        +(INBOX[k.sym]&&!K100[k.sym]?'<span class="ainbox">IN THE BOX '+(+INBOX[k.sym].box1_lo).toPrecision(4)+' – '+(+INBOX[k.sym].box1_hi).toPrecision(4)+' (1m + 5m) since '+INBOX[k.sym].since+'</span>':'')
+        +(INBOX[k.sym]&&!K100[k.sym]&&INBOX[k.sym].press?ptTag(INBOX[k.sym].box1_hi,INBOX[k.sym].taps,INBOX[k.sym].box1_lo,INBOX[k.sym].why):'')
+        +(INBOX[k.sym]&&!K100[k.sym]&&!INBOX[k.sym].press?'<span class="ainbox">IN THE BOX '+(+INBOX[k.sym].box1_lo).toPrecision(4)+' – '+(+INBOX[k.sym].box1_hi).toPrecision(4)+' (1m + 5m) since '+INBOX[k.sym].since+'</span>':'')
         +'<span class="abig">'+hotLabel(k.sym)+'</span>'
         +'<span class="alast">'+lastTag(k.sym)+'</span>'
         +'<span class="v1chip" data-vsym="'+k.sym+'">'+volHtml(k.sym)+'</span>'
@@ -590,6 +595,9 @@ function ringJumpSym(sym){
   if(!el)return;const row=el.closest('tr')||el;row.scrollIntoView({behavior:'smooth',block:'center'});
   row.classList.add('rbflashrow');setTimeout(()=>row.classList.remove('rbflashrow'),2500)}
 // UNDER THE LINES (2026-11-14) -- reads :8792, hides any name already in the HOT 2 rows above
+// 11-24 PRESSING TOP tag (blinks red): box top, how many times it tagged the top, box range, and why it lit
+function ptTag(top,taps,lo,why,small){if(small)return '<span class="ptop">PRESSING TOP</span>';
+  return '<span class="ptop">PRESSING TOP '+(+top).toPrecision(4)+' &middot; '+(taps||2)+' taps'+(lo?' &middot; box '+(+lo).toPrecision(4)+' &ndash; '+(+top).toPrecision(4):'')+(why&&why.indexOf('100k')>=0?' &middot; 100k':'')+'</span>'}
 function lnTag(name,line,px){if(!line)return '<span class="dim">'+name+' ?</span>';
   return px<line?'<span class="lnU">UNDER '+name+' '+(+line).toPrecision(4)+'</span>':'<span class="lnA">ABOVE '+name+' '+(+line).toPrecision(4)+'</span>'}
 async function loadUnder(){
@@ -609,6 +617,7 @@ async function loadUnder(){
     const bt=b.state==='both'?'<span class="bxtag both">IN 1M + 5M BOX '+(+b.b1).toPrecision(4)+' &ndash; '+(+b.t1).toPrecision(4)+'</span>'
       :b.state==='1m'?'<span class="bxtag">1M BOX '+(+b.b1).toPrecision(4)+' &ndash; '+(+b.t1).toPrecision(4)+'</span>'
       :b.state==='5m'?'<span class="bxtag">5M BOX '+(+b.b5).toPrecision(4)+' &ndash; '+(+b.t5).toPrecision(4)+'</span>':'';
+    const btp=b.press&&!(b.out1||b.out5)?ptTag(b.t1,b.taps,b.b1,b.why):bt;   // 11-24 PRESSING TOP replaces the box tag
     const ot=(b.out1||b.out5)?'<span class="bxtag" style="background:#3b0d12;color:#ff8a8a;border-color:#ff5c5c">BROKE OUT OF '+(b.out1&&b.out5?'1M + 5M':b.out1?'1M':'5M')+' BOX '+(+(b.out5&&!b.out1?b.t5:b.t1)).toPrecision(4)+'</span>':'';
     return '<div class="ulrow'+(b.state==='both'?' calminbox':'')+'"'+(fresh?' style="border-left-color:#7CFC00;background:#11291a"':'')+'><div class="aline">'
     +'<span class="ulat"'+(fresh?' style="color:#7CFC00"':'')+'>'+(r.last100?'100k at '+r.last100:(r.at||''))+'</span>'
@@ -617,7 +626,7 @@ async function loadUnder(){
     +'<span>'+(+px).toPrecision(4)+'</span>'
     +(r.vbest?'<span class="v1chip" style="border-color:#1fd3ea">now '+big(r.vbest)+'/min</span>':'')
     +(r.hot2?'<span style="background:#3a2a05;color:#f5c542;font-weight:700;font-size:11px;padding:1px 6px;border-radius:4px">&rarr; HOT 2 '+r.hot2+'</span>':'')
-    +L+bt+ot
+    +L+btp+ot
     +'<span class="arght dim">'+(lv?(((lv/px)-1)*100).toFixed(1)+'% to '+((rth||fresh)&&r.pmh?'PMHOD':'YHOD')+' &middot; ':'')+'first '+(r.at||'').slice(0,5)+'</span></div></div>'}).join('');
 }
 </script>
@@ -674,6 +683,7 @@ let BOXES={};
 async function loadBoxes(){try{const f=await (await fetch('http://127.0.0.1:8799/state',{cache:'no-store'})).json();BOXES=f.boxes||{}}catch(e){}boxPaint()}
 const p4=x=>(+x).toPrecision(4);
 function boxHtml(s,small){const b=BOXES[s];if(!b)return '';
+  if(b.press&&!(small===false&&b.state==='both'))return ptTag(b.box1_hi,b.taps,b.box1_lo,b.why,small);   // 11-24 PRESSING TOP (cards in BOTH boxes show it in place of IN THE BOX)
   if(b.state==='both')return small?'<span class="bxtag both">1M+5M BOX</span>':'';     // the card already has IN THE BOX
   const lo=b.state==='1m'?b.box1_lo:b.box5_lo,hi=b.state==='1m'?b.box1_hi:b.box5_hi;
   return '<span class="bxtag">'+(b.state==='1m'?'1M':'5M')+' BOX'+(small?'':' '+p4(lo)+' &ndash; '+p4(hi)+' &middot; since '+b.since)+'</span>'}
@@ -799,7 +809,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795458018';
+const H2_BUILD='1795482426';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
