@@ -125,7 +125,7 @@ async function client(){
   return null}
 (async()=>{const sb=await client();
   if(!sb){G('grid').innerHTML='<div class="empty">Please <a href="./">sign in on the live scanner</a> first, then come back to this page.</div>';return}
-  const {data,error}=await sb.from('board').select('data,updated_at').eq('id',2).maybeSingle();
+  const {data,error}=await sb.from('board').select('data,updated_at').eq('id',4).maybeSingle();   // 11-25: own row (id 2 = member feed updates)
   if(error||!data||!data.data||!data.data.rows){G('grid').innerHTML='<div class="empty">This list is for active members. If you just joined, give it a few minutes. Questions: support@hot2scanner.com</div>';return}
   render(data.data,false,'Members see these the moment they happen.')})();
 </script></body></html>
