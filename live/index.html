@@ -809,7 +809,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795702049';
+const H2_BUILD='1795702246';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
@@ -834,4 +834,12 @@ try{const why=h2closed();if(why){let d=new Date();let k;for(let i=0;i<10;i++){d=
 sb.auth.getSession().then(({data})=>start(data.session));
 sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN')start(session)});
 </script>
-<a id="runbtn" href="runners.html" style="position:fixed;right:14px;bottom:34px;z-index:9998;background:#121923;border:1px solid #ff3df0;color:#fff;font:700 13px Inter,Segoe UI,Arial,sans-serif;padding:7px 12px;border-radius:999px;text-decoration:none">&#128200; Recent Runners</a><div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font:12px/1.4 Inter,Segoe UI,Arial,sans-serif;text-align:center;padding:4px 10px;pointer-events:none">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style></body></html>
+<a id="runbtn" href="runners.html" style="position:fixed;right:14px;bottom:34px;z-index:9998;background:#121923;border:1px solid #ff3df0;color:#fff;font:700 13px Inter,Segoe UI,Arial,sans-serif;padding:7px 12px;border-radius:999px;text-decoration:none">&#128200; Recent Runners</a><div id="riskbar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(11,15,21,.94);border-top:1px solid #223042;color:#8a97a8;font:12px/1.4 Inter,Segoe UI,Arial,sans-serif;text-align:center;padding:4px 10px;pointer-events:none">Trading is risky and you can lose money. Not financial advice. For information and education only.</div><style>body{padding-bottom:30px}</style><div id="h2start" style="position:fixed;inset:0;z-index:100;background:rgba(5,8,12,.93);display:flex;align-items:center;justify-content:center;padding:16px">
+<button id="h2startbtn" type="button" style="background:#ff3df0;color:#fff;border:0;border-radius:16px;padding:22px 34px;font:800 26px Inter,Segoe UI,Arial,sans-serif;cursor:pointer;box-shadow:0 0 0 6px rgba(255,61,240,.25);max-width:100%">&#128276; Start the scanner<br><span style="font:600 15px Inter,Segoe UI,Arial,sans-serif;opacity:.9">turns on the alert bells</span></button></div>
+<script>/* 11-26 owner: one tap opens the scanner AND allows sound (browsers block site sound until a tap) */
+(function(){var ov=document.getElementById('h2start');if(!ov)return;
+  function go(){try{var ac=_actx();if(ac&&ac.state==='suspended')ac.resume();BELL_ON=true;BELL_READY=true;bellSound();bellBtn()}catch(e){}
+    ov.remove();var u=document.getElementById('h2upd');if(u)u.remove()}
+  document.getElementById('h2startbtn').addEventListener('click',go);
+  try{var ac=_actx();if(ac&&ac.state==='running'){BELL_READY=true;ov.remove();bellBtn()}}catch(e){}})();
+</script></body></html>
