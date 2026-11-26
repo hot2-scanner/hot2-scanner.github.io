@@ -288,7 +288,7 @@ async function loadGold(){let j;
 // (sym + its 'since' time, so a re-break after a retest rings again) or a new blinking first-alert-+-100k row.
 // Browsers only allow sound after one click on the page; the button shows when that is still needed. Off/on is remembered.
 let BELL_ON=true,BELL_SEEN=null,_ac=null,BELL_READY=false;   // READY = sound allowed by a click on this page
-try{BELL_ON=localStorage.getItem('h2_bell')!=='0'}catch(e){}
+BELL_ON=true;   /* 11-26 owner: bells ALWAYS ON for everyone, no off switch */
 function _actx(){if(!_ac){try{_ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return _ac}
 function bellSound(){const ac=_actx();if(!ac)return;if(ac.state==='suspended')ac.resume();
   [0,0.22,0.44].forEach((d,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=[1568,1319,1568][i];
@@ -299,7 +299,7 @@ function bellBtn(){const b=$('bellbtn');if(!b)return;const ac=_ac;const needClic
   b.style.background=!BELL_ON?'#262b35':(needClick?'#5a4300':'#1d4d2b');b.style.color=!BELL_ON?'#8a93a3':'#fff'}
 function bellToggle(){const ac=_actx();if(ac&&ac.state==='suspended')ac.resume().then(bellBtn);
   if(BELL_ON&&!BELL_READY){BELL_READY=true;bellSound();bellBtn();return}     // first click = allow sound + a test ring, NOT off
-  BELL_READY=true;BELL_ON=!BELL_ON;try{localStorage.setItem('h2_bell',BELL_ON?'1':'0')}catch(e){};if(BELL_ON)bellSound();bellBtn()}
+  BELL_READY=true;BELL_ON=true;bellSound();bellBtn()}   /* clicking the button = test ring, never off */
 document.addEventListener('click',e=>{if(e.target&&e.target.id==='bellbtn')return;const ac=_actx();if(!ac)return;
   BELL_READY=true;if(ac.state==='suspended')ac.resume().then(bellBtn);else bellBtn()},true);
 function bellCheck(){bellBtn()}   // 11-18: what rang now comes from the SERVER (/bells), see loadBells()
@@ -809,7 +809,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795687609';
+const H2_BUILD='1795702049';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
