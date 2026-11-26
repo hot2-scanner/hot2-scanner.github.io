@@ -793,8 +793,8 @@ async function pull(){
   if(!r1||!(await useRow(r1,false)))return false;
   if(r2)await useRow(r2,false);return true}
 function tick(){if(!LAST_AT)return;const age=(Date.now()-LAST_AT.getTime())/1000;
-  const s=G('live');s.classList.toggle('stale',age>90);
-  G('lt').textContent=age>90?('scanner offline - last update '+LAST_AT.toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'):'live'}
+  const s=G('live');const cl=h2closed();s.classList.toggle('stale',age>90&&!cl);
+  G('lt').textContent=(age>90&&cl)?'market closed today':age>90?('scanner offline - last update '+LAST_AT.toLocaleTimeString('en-US',{timeZone:'America/New_York'})+' ET'):'live'}
 async function start(session){
   if(!session){G('gate').style.display='flex';return}
   const ok=await pull();
@@ -809,7 +809,7 @@ async function start(session){
   setInterval(()=>{if(Date.now()-LAST_RT>20000)pull()},15000);setInterval(tick,1000);tick()}
 // 11-18 his OK: AUTO-UPDATE. Members leave this tab open all day; every 3 min check whether a newer version was uploaded
 // and reload into it (login is kept). Browsers block sound after a reload until one click, so a banner asks for that click.
-const H2_BUILD='1795482426';
+const H2_BUILD='1795687609';
 setInterval(async()=>{try{const t=await (await _realFetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text();
   const m=/H2_BUILD='([0-9]+)'/.exec(t);if(m&&m[1]!==H2_BUILD){try{sessionStorage.setItem('h2_updated','1')}catch(e){};location.reload()}}catch(e){}},180000);
 try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2_updated');
@@ -819,6 +819,18 @@ try{if(sessionStorage.getItem('h2_updated')==='1'){sessionStorage.removeItem('h2
 // 11-18 his ask: the clock ticks every second (Eastern time), like a real clock. The data updates by itself every few
 // seconds; if it ever stops for 90 s the top-right dot turns red "scanner offline".
 setInterval(()=>{const h=document.getElementById('hdr');if(h)h.textContent='live · '+new Date().toLocaleString('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).replace(',','')+' ET'},1000);
+// 11-26 his ask: on market holidays + weekends members see a clear MARKET CLOSED banner (not "scanner offline").
+const H2_CLOSED={'2026-11-26':'Thanksgiving','2026-12-25':'Christmas','2027-01-01':"New Year's Day",'2027-01-18':'Martin Luther King Jr. Day','2027-02-15':"Presidents' Day",'2027-03-26':'Good Friday','2027-05-31':'Memorial Day','2027-06-18':'Juneteenth','2027-07-05':'Independence Day','2027-09-06':'Labor Day','2027-11-25':'Thanksgiving','2027-12-24':'Christmas'};
+const H2_HALF={'2026-11-27':1,'2026-12-24':1,'2027-11-26':1};
+function h2day(d){return d.toLocaleDateString('en-CA',{timeZone:'America/New_York'})}
+function h2closed(){const k=h2day(new Date());const wd=new Date(k+'T12:00:00').getDay();
+  if(H2_CLOSED[k])return H2_CLOSED[k];return(wd===0||wd===6)?'the weekend':null}
+try{const why=h2closed();if(why){let d=new Date();let k;for(let i=0;i<10;i++){d=new Date(d.getTime()+86400000);k=h2day(d);const w=new Date(k+'T12:00:00').getDay();if(w!==0&&w!==6&&!H2_CLOSED[k])break}
+  const nd=new Date(k+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'numeric',day:'numeric'});
+  const b=document.createElement('div');b.id='h2closed';
+  b.innerHTML='&#128197; <b>Market closed today ('+why+').</b> The live scanner is back <b>'+nd+' at 4:00 AM ET</b>'+(H2_HALF[k]?' &mdash; half day, the market closes at 1:00 PM ET':'')+'. Meanwhile, see the <a href="runners.html" style="color:#ffd000">Recent Runners</a>.';
+  b.style.cssText='position:relative;z-index:61;background:#2a2206;color:#fff;font:600 15px Inter,Segoe UI,Arial,sans-serif;text-align:center;padding:12px 14px;border-bottom:2px solid #ffd000';
+  document.body.insertBefore(b,document.body.firstChild)}}catch(e){}
 sb.auth.getSession().then(({data})=>start(data.session));
 sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN')start(session)});
 </script>
