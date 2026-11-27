@@ -139,5 +139,6 @@ document.getElementById('lb').onclick=function(){this.style.display='none';};
   const b=document.createElement('button');b.className='unl';b.style.border='0';b.style.cursor='pointer';b.textContent='Copy link';
   b.onclick=async()=>{try{await navigator.clipboard.writeText(link);b.textContent='Copied'}catch(e){b.textContent='Select and copy it'}};
   L.appendChild(s);L.appendChild(b)})();
-</script></body>
+</script><script src="/hit.js" defer></script>
+</body>
 </html>

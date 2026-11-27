@@ -128,4 +128,5 @@ async function client(){
   const {data,error}=await sb.from('board').select('data,updated_at').eq('id',4).maybeSingle();   // 11-25: own row (id 2 = member feed updates)
   if(error||!data||!data.data||!data.data.rows){G('grid').innerHTML='<div class="empty">This list is for active members. If you just joined, give it a few minutes. Questions: support@hot2scanner.com</div>';return}
   render(data.data,false,'Members see these the moment they happen.')})();
-</script></body></html>
+</script><script src="/hit.js" defer></script>
+</body></html>

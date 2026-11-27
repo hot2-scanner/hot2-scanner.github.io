@@ -228,5 +228,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')lbClose()});
 <script id="h2menu-js">(function(){var m=document.getElementById('h2m');if(!m)return;var b=m.querySelector('button');
 b.addEventListener('click',function(e){e.stopPropagation();var o=m.classList.toggle('open');b.setAttribute('aria-expanded',o)});
 document.addEventListener('click',function(e){if(!m.contains(e.target)){m.classList.remove('open');b.setAttribute('aria-expanded','false')}});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){m.classList.remove('open');b.setAttribute('aria-expanded','false')}});})();</script></body>
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){m.classList.remove('open');b.setAttribute('aria-expanded','false')}});})();</script><script src="/hit.js" defer></script>
+</body>
 </html>
